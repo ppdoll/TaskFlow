@@ -1,0 +1,9 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "debug.javascript.autoAttachFilter": "disabled",
+  "files.eol": "\n",
+  "editor.formatOnSave": false,
+  "eslint.useFlatConfig": true,
+  "tailwindCSS.experimental.classRegex": []
+}
