@@ -208,23 +208,31 @@ export default function HelpPage() {
           </ul>
         </Section>
 
-        <Section emoji="📊" title="상태별 보기 · 타임라인">
+        <Section emoji="📊" title="다양한 보기 (상태별 · 타임라인 · 캘린더 · 보고서)">
           <ul className="space-y-3 text-sm leading-6 text-slate-600">
             <li>
-              <strong>상태별 보기</strong> — 조직 페이지의{" "}
-              <span className={kbd}>📊 상태별 보기</span>에서 조직의 모든
-              업무를 준비/진행/완료 컬럼으로 한눈에 봅니다.
+              <strong>보기 전환</strong> — 조직 페이지와 보드 화면 상단의 탭으로
+              전환합니다. 조직에서 보면 모든 보드의 업무가, 보드에서 보면 그
+              보드의 업무만 표시됩니다.
             </li>
             <li>
-              <strong>타임라인</strong> —{" "}
-              <span className={kbd}>📅 타임라인</span>에서 작업 시작~종료
-              시간을 간트 차트로 봅니다. 막대를 클릭하면 해당 카드가 열립니다.
+              <strong>📊 상태별</strong> — 업무를 준비/진행/완료 컬럼으로
+              한눈에 봅니다.
             </li>
             <li>
-              <strong>날짜 미지정 업무</strong> — 타임라인 상단의 접이식
-              목록에 모입니다. 목록에서 시작~종료 시간을 입력하고{" "}
-              <span className={kbd}>지정</span>을 누르면 그 자리에서 바로
-              타임라인에 추가됩니다.
+              <strong>📅 타임라인</strong> — 작업 시작~종료 시간을 간트 차트로
+              봅니다. 상단의 <strong>날짜 미지정 업무</strong> 접이식 목록에서
+              시작~종료 시간을 입력하고 <span className={kbd}>지정</span>을
+              누르면 바로 타임라인에 추가됩니다.
+            </li>
+            <li>
+              <strong>🗓️ 캘린더</strong> — 월간 달력에 작업 기간(없으면
+              마감일)이 표시됩니다. 담당자/상태 필터와 월 이동을 지원합니다.
+            </li>
+            <li>
+              <strong>📈 보고서</strong> — 최근 7일 완료/생성/활동 수, 상태
+              분포 차트, 최근 활동, 팀 워크로드, 진행률, 마감 예정 목록을
+              봅니다.
             </li>
           </ul>
         </Section>

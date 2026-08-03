@@ -602,6 +602,22 @@ export default function BoardCanvas({
           </h1>
         )}
         <span className="flex-1" />
+        <nav className="flex gap-1 rounded-lg bg-white/10 p-1 text-sm">
+          {[
+            { href: `/board/${board.id}/status`, label: "상태별" },
+            { href: `/board/${board.id}/timeline`, label: "타임라인" },
+            { href: `/board/${board.id}/calendar`, label: "캘린더" },
+            { href: `/board/${board.id}/report`, label: "보고서" },
+          ].map((view) => (
+            <Link
+              key={view.href}
+              href={view.href}
+              className="rounded-md px-2.5 py-1 transition hover:bg-white/25"
+            >
+              {view.label}
+            </Link>
+          ))}
+        </nav>
         <NotificationBell userId={currentUserId} variant="dark" />
         <Link
           href="/help"

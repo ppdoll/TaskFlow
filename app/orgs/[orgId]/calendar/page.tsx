@@ -3,10 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
-import StatusView from "@/components/org/StatusView";
+import CalendarView from "@/components/org/CalendarView";
 import { fetchMemberNames, fetchScopedCards } from "@/lib/view-data";
 
-export default async function OrgStatusPage({
+export default async function OrgCalendarPage({
   params,
 }: {
   params: Promise<{ orgId: string }>;
@@ -51,11 +51,11 @@ export default async function OrgStatusPage({
           /
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold">상태별 보기</h1>
-          <ViewTabs base={`/orgs/${orgId}`} type="org" active="status" />
+          <h1 className="text-2xl font-bold">캘린더</h1>
+          <ViewTabs base={`/orgs/${orgId}`} type="org" active="calendar" />
         </div>
 
-        <StatusView cards={cards} namesById={namesById} />
+        <CalendarView cards={cards} namesById={namesById} />
       </main>
     </>
   );

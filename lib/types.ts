@@ -106,6 +106,21 @@ export interface ChecklistItem {
   position: number;
 }
 
+/** 상태별/캘린더/보고서/타임라인 뷰에서 쓰는 보드 정보 포함 카드 */
+export interface ScopedCard {
+  id: string;
+  title: string;
+  status: string;
+  due_date: string | null;
+  start_at: string | null;
+  end_at: string | null;
+  board_id: string;
+  list_id: string;
+  created_at: string;
+  card_assignees: { user_id: string }[];
+  boards: { id: string; title: string; color: string };
+}
+
 export interface Notification {
   id: number;
   user_id: string;

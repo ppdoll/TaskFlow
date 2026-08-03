@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
+import ViewTabs from "@/components/ViewTabs";
 import CreateBoardForm from "@/components/org/CreateBoardForm";
 import { avatarColor, boardColor, initial, ROLE_LABELS } from "@/lib/utils";
 import type { Board, OrgMember } from "@/lib/types";
@@ -55,25 +56,14 @@ export default async function OrgPage({
         </div>
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold">{org.name}</h1>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={`/orgs/${orgId}/status`}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-            >
-              📊 상태별 보기
-            </Link>
-            <Link
-              href={`/orgs/${orgId}/timeline`}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-            >
-              📅 타임라인
-            </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <ViewTabs base={`/orgs/${orgId}`} type="org" active="main" />
             {canManage && (
               <Link
                 href={`/orgs/${orgId}/settings`}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
               >
-                조직 설정 · 초대
+                ⚙️ 설정 · 초대
               </Link>
             )}
           </div>

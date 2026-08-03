@@ -3,10 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
-import StatusView from "@/components/org/StatusView";
-import { fetchMemberNames, fetchScopedCards } from "@/lib/view-data";
+import ReportView from "@/components/org/ReportView";
+import {
+  fetchMemberNames,
+  fetchReportData,
+  fetchScopedCards,
+} from "@/lib/view-data";
 
-export default async function OrgStatusPage({
+export default async function OrgReportPage({
   params,
 }: {
   params: Promise<{ orgId: string }>;
@@ -28,9 +32,10 @@ export default async function OrgStatusPage({
   ]);
   if (!org) notFound();
 
-  const [cards, namesById] = await Promise.all([
+  const [cards, namesById, report] = await Promise.all([
     fetchScopedCards(supabase, { orgId }),
     fetchMemberNames(supabase, orgId),
+    fetchReportData(supabase, { orgId }),
   ]);
 
   return (
@@ -51,11 +56,16 @@ export default async function OrgStatusPage({
           /
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold">상태별 보기</h1>
-          <ViewTabs base={`/orgs/${orgId}`} type="org" active="status" />
+          <h1 className="text-2xl font-bold">보고서</h1>
+          <ViewTabs base={`/orgs/${orgId}`} type="org" active="report" />
         </div>
 
-        <StatusView cards={cards} namesById={namesById} />
+        <ReportView
+          cards={cards}
+          activities={report.activities}
+          counts={report.counts}
+          namesById={namesById}
+        />
       </main>
     </>
   );

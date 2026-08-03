@@ -3,34 +3,34 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
-import StatusView from "@/components/org/StatusView";
-import { fetchMemberNames, fetchScopedCards } from "@/lib/view-data";
+import CalendarView from "@/components/org/CalendarView";
+import {
+  fetchBoardContext,
+  fetchMemberNames,
+  fetchScopedCards,
+} from "@/lib/view-data";
 
-export default async function OrgStatusPage({
+export default async function BoardCalendarPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ boardId: string }>;
 }) {
-  const { orgId } = await params;
+  const { boardId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: org }] = await Promise.all([
+  const [{ data: profile }, board] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase
-      .from("organizations")
-      .select("id, name")
-      .eq("id", orgId)
-      .maybeSingle(),
+    fetchBoardContext(supabase, boardId),
   ]);
-  if (!org) notFound();
+  if (!board) notFound();
 
   const [cards, namesById] = await Promise.all([
-    fetchScopedCards(supabase, { orgId }),
-    fetchMemberNames(supabase, orgId),
+    fetchScopedCards(supabase, { boardId }),
+    fetchMemberNames(supabase, board.org_id),
   ]);
 
   return (
@@ -43,19 +43,26 @@ export default async function OrgStatusPage({
           </Link>{" "}
           /{" "}
           <Link
-            href={`/orgs/${orgId}`}
+            href={`/orgs/${board.org_id}`}
             className="hover:text-sky-600 hover:underline"
           >
-            {org.name}
+            {board.orgName}
+          </Link>{" "}
+          /{" "}
+          <Link
+            href={`/board/${boardId}`}
+            className="hover:text-sky-600 hover:underline"
+          >
+            {board.title}
           </Link>{" "}
           /
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold">상태별 보기</h1>
-          <ViewTabs base={`/orgs/${orgId}`} type="org" active="status" />
+          <h1 className="text-2xl font-bold">{board.title} — 캘린더</h1>
+          <ViewTabs base={`/board/${boardId}`} type="board" active="calendar" />
         </div>
 
-        <StatusView cards={cards} namesById={namesById} />
+        <CalendarView cards={cards} namesById={namesById} />
       </main>
     </>
   );
