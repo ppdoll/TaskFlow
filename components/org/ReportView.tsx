@@ -12,10 +12,11 @@ import {
 import type { ScopedCard } from "@/lib/types";
 import type { ReportActivity, ReportCounts } from "@/lib/view-data";
 
+/** STATUS_HEADER_STYLES 와 같은 색 (slate-500 / blue-600 / emerald-600) */
 const STATUS_CHART_COLORS: Record<string, string> = {
-  ready: "#f97316", // orange-500
-  in_progress: "#3b82f6", // blue-500
-  done: "#10b981", // emerald-500
+  ready: "#636369",
+  in_progress: "#3b7dd8",
+  done: "#2e8b57",
 };
 
 /** 다음 7일 내 마감(완료 제외) 카드 필터 */
@@ -242,7 +243,7 @@ export default function ReportView({
             업무 항목의 상태 스냅샷입니다.
           </p>
           {cards.length === 0 ? (
-            <p className="py-10 text-center text-sm text-slate-300">
+            <p className="py-10 text-center text-sm text-slate-400">
               업무가 없습니다.
             </p>
           ) : (
@@ -258,7 +259,7 @@ export default function ReportView({
           </p>
           <ul className="max-h-72 space-y-3 overflow-y-auto pr-1">
             {activities.length === 0 && (
-              <li className="py-8 text-center text-sm text-slate-300">
+              <li className="py-8 text-center text-sm text-slate-400">
                 최근 활동이 없습니다.
               </li>
             )}
@@ -298,7 +299,7 @@ export default function ReportView({
           </p>
           <ul className="space-y-3">
             {workloadRows.length === 0 && (
-              <li className="py-8 text-center text-sm text-slate-300">
+              <li className="py-8 text-center text-sm text-slate-400">
                 업무가 없습니다.
               </li>
             )}
@@ -306,7 +307,7 @@ export default function ReportView({
               <li key={row.id ?? "unassigned"} className="flex items-center gap-3">
                 <span
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${
-                    row.id ? avatarColor(row.id) : "bg-slate-300"
+                    row.id ? avatarColor(row.id) : "bg-slate-400"
                   }`}
                 >
                   {row.id ? initial(row.name) : "?"}
@@ -344,7 +345,7 @@ export default function ReportView({
           </p>
           <ul className="space-y-4">
             {boardRows.length === 0 && (
-              <li className="py-8 text-center text-sm text-slate-300">
+              <li className="py-8 text-center text-sm text-slate-400">
                 보드가 없습니다.
               </li>
             )}

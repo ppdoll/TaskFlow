@@ -567,13 +567,13 @@ export default function BoardCanvas({
 
   return (
     <div
-      className={`flex h-screen flex-col bg-gradient-to-br ${boardColor(board.color).header}`}
+      className={`flex h-screen flex-col ${boardColor(board.color).surface}`}
     >
       {/* 보드 헤더 */}
-      <header className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 text-white">
+      <header className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-black/5 bg-white/70 px-4 py-2.5 backdrop-blur-xl">
         <Link
           href={`/orgs/${board.org_id}`}
-          className="rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium transition hover:bg-white/30"
+          className="rounded-lg px-2 py-1.5 text-sm font-medium text-sky-600 transition hover:bg-slate-100"
         >
           ← {orgName}
         </Link>
@@ -590,11 +590,11 @@ export default function BoardCanvas({
                 setEditingBoardTitle(false);
               }
             }}
-            className="rounded-lg border-none bg-white/90 px-2 py-1 text-lg font-bold text-slate-800 focus:outline-none"
+            className="rounded-lg border border-sky-500 bg-white px-2 py-1 text-lg font-bold text-slate-900 focus:outline-none"
           />
         ) : (
           <h1
-            className="cursor-text text-lg font-bold"
+            className="cursor-text text-lg font-bold text-slate-900"
             onClick={() => setEditingBoardTitle(true)}
             title="클릭해서 이름 변경"
           >
@@ -602,7 +602,7 @@ export default function BoardCanvas({
           </h1>
         )}
         <span className="flex-1" />
-        <nav className="flex gap-1 rounded-lg bg-white/10 p-1 text-sm">
+        <nav className="flex gap-0.5 rounded-lg bg-slate-100 p-0.5 text-sm">
           {[
             { href: `/board/${board.id}/status`, label: "상태별" },
             { href: `/board/${board.id}/timeline`, label: "타임라인" },
@@ -612,30 +612,30 @@ export default function BoardCanvas({
             <Link
               key={view.href}
               href={view.href}
-              className="rounded-md px-2.5 py-1 transition hover:bg-white/25"
+              className="rounded-md px-2.5 py-1 font-medium text-slate-600 transition hover:bg-white hover:text-slate-900"
             >
               {view.label}
             </Link>
           ))}
         </nav>
-        <NotificationBell userId={currentUserId} variant="dark" />
+        <NotificationBell userId={currentUserId} />
         <Link
           href="/help"
-          className="rounded-lg bg-white/10 px-3 py-1.5 text-sm transition hover:bg-white/30"
+          className="rounded-lg px-2.5 py-1.5 text-sm text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
           title="사용 방법"
         >
           도움말
         </Link>
         <button
           onClick={handleDeleteBoard}
-          className="rounded-lg bg-white/10 px-3 py-1.5 text-sm transition hover:bg-red-500/80"
+          className="rounded-lg px-2.5 py-1.5 text-sm text-slate-500 transition hover:bg-red-50 hover:text-red-600"
         >
           보드 삭제
         </button>
       </header>
 
       {/* 보드 본문 */}
-      <div className="board-scroll flex-1 overflow-x-auto overflow-y-hidden px-4 pb-4">
+      <div className="board-scroll flex-1 overflow-x-auto overflow-y-hidden px-4 pt-4 pb-4">
         <DndContext
           id={`board-dnd-${board.id}`}
           sensors={sensors}
@@ -669,7 +669,7 @@ export default function BoardCanvas({
               {addingList ? (
                 <form
                   onSubmit={handleAddList}
-                  className="rounded-xl bg-slate-100 p-3 shadow"
+                  className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
                 >
                   <input
                     autoFocus
@@ -679,7 +679,7 @@ export default function BoardCanvas({
                       if (e.key === "Escape") setAddingList(false);
                     }}
                     placeholder="리스트 이름 입력..."
-                    className="w-full rounded-lg border border-sky-400 px-2 py-1.5 text-sm focus:outline-none"
+                    className="w-full rounded-lg border border-sky-500 px-2 py-1.5 text-sm focus:outline-none"
                   />
                   <div className="mt-2 flex gap-2">
                     <button
@@ -700,7 +700,7 @@ export default function BoardCanvas({
               ) : (
                 <button
                   onClick={() => setAddingList(true)}
-                  className="w-full rounded-xl bg-white/20 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/30"
+                  className="w-full rounded-xl border border-slate-200/80 bg-white/60 px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-white"
                 >
                   + 리스트 추가
                 </button>

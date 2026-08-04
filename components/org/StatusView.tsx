@@ -40,7 +40,7 @@ export default function StatusView({
             </header>
             <ul className="space-y-2 p-3">
               {statusCards.length === 0 && (
-                <li className="py-6 text-center text-sm text-slate-300">
+                <li className="py-6 text-center text-sm text-slate-400">
                   해당 상태의 업무가 없습니다.
                 </li>
               )}

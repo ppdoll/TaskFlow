@@ -372,11 +372,11 @@ export default function CardModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-10"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/25 px-4 py-10 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl rounded-xl bg-white shadow-2xl"
+        className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
@@ -389,7 +389,7 @@ export default function CardModal({
               onKeyDown={(e) => {
                 if (e.key === "Enter") (e.target as HTMLInputElement).blur();
               }}
-              className="w-full rounded-lg border border-transparent px-2 py-1 text-xl font-bold focus:border-sky-400 focus:outline-none"
+              className="w-full rounded-lg border border-transparent px-2 py-1 text-xl font-bold focus:border-sky-500 focus:outline-none"
             />
             <p className="mt-1 px-2 text-sm text-slate-400">
               리스트: <span className="font-medium">{listTitle}</span>
@@ -465,7 +465,7 @@ export default function CardModal({
                 }}
                 placeholder="업무 내용을 자세히 적어주세요..."
                 rows={4}
-                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:border-sky-400 focus:bg-white focus:outline-none"
+                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:border-sky-500 focus:bg-white focus:outline-none"
               />
               {descDirty && (
                 <div className="mt-1 flex gap-2">
@@ -565,13 +565,13 @@ export default function CardModal({
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
                     placeholder="https://... 주소 입력"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
                   />
                   <input
                     value={linkName}
                     onChange={(e) => setLinkName(e.target.value)}
                     placeholder="표시 이름 (선택)"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
                   />
                   <div className="flex gap-2">
                     <button
@@ -645,7 +645,7 @@ export default function CardModal({
                   value={newItem}
                   onChange={(e) => setNewItem(e.target.value)}
                   placeholder="항목 추가..."
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                  className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
                 />
                 <button
                   type="submit"
@@ -666,7 +666,7 @@ export default function CardModal({
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="댓글 작성..."
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none"
+                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
                 />
                 <button
                   type="submit"
@@ -692,7 +692,7 @@ export default function CardModal({
                         {comment.user_id === currentUserId && (
                           <button
                             onClick={() => deleteComment(comment.id)}
-                            className="ml-2 text-slate-300 hover:text-red-500"
+                            className="ml-2 text-slate-400 hover:text-red-600"
                           >
                             삭제
                           </button>
@@ -839,7 +839,7 @@ export default function CardModal({
                       value={newLabelName}
                       onChange={(e) => setNewLabelName(e.target.value)}
                       placeholder="새 라벨 이름"
-                      className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs focus:border-sky-400 focus:outline-none"
+                      className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs focus:border-sky-500 focus:outline-none"
                     />
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {LABEL_COLOR_KEYS.map((key) => (
@@ -880,7 +880,7 @@ export default function CardModal({
                     buildStatusPatch(card, e.target.value as CardStatus)
                   )
                 }
-                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
               >
                 {STATUS_ORDER.map((s) => (
                   <option key={s} value={s}>
@@ -907,7 +907,7 @@ export default function CardModal({
                     start_at: fromLocalInput(e.target.value),
                   })
                 }
-                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
               />
             </div>
             <div>
@@ -922,7 +922,7 @@ export default function CardModal({
                     end_at: fromLocalInput(e.target.value),
                   })
                 }
-                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
               />
             </div>
 
@@ -939,7 +939,7 @@ export default function CardModal({
                     due_date: e.target.value || null,
                   })
                 }
-                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-400 focus:outline-none"
+                className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-sky-500 focus:outline-none"
               />
               {card.due_date && (
                 <button

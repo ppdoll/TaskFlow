@@ -170,7 +170,7 @@ function UnscheduledRow({
           type="datetime-local"
           value={start}
           onChange={(e) => setStart(e.target.value)}
-          className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-sky-400 focus:outline-none"
+          className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-sky-500 focus:outline-none"
           aria-label="시작 시간"
         />
         <span className="text-xs text-slate-400">~</span>
@@ -178,7 +178,7 @@ function UnscheduledRow({
           type="datetime-local"
           value={end}
           onChange={(e) => setEnd(e.target.value)}
-          className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-sky-400 focus:outline-none"
+          className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-sky-500 focus:outline-none"
           aria-label="종료 시간 (선택)"
         />
         <button
@@ -252,7 +252,7 @@ export default function TimelineView({
         {unscheduledOpen && (
           <div className="border-t border-slate-100">
             {unscheduled.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-slate-300">
+              <p className="px-4 py-6 text-center text-sm text-slate-400">
                 모든 업무에 날짜가 지정되어 있습니다. 👍
               </p>
             ) : (
@@ -320,7 +320,7 @@ export default function TimelineView({
                       d.isToday
                         ? "bg-red-50 font-bold text-red-600"
                         : d.isWeekend
-                          ? "bg-slate-50 text-slate-300"
+                          ? "bg-slate-50 text-slate-400"
                           : "text-slate-400"
                     }`}
                     style={{ width: DAY_W }}

@@ -65,7 +65,7 @@ export default function ListColumn({
     <div
       ref={overlay ? undefined : setNodeRef}
       style={style}
-      className={`flex max-h-full w-72 shrink-0 flex-col rounded-xl bg-slate-100 shadow ${
+      className={`flex max-h-full w-72 shrink-0 flex-col rounded-xl border border-black/5 bg-slate-100/85 shadow-sm backdrop-blur ${
         isDragging ? "opacity-40" : ""
       } ${overlay ? "rotate-1 shadow-xl" : ""}`}
     >
@@ -88,7 +88,7 @@ export default function ListColumn({
                 setEditingTitle(false);
               }
             }}
-            className="w-full rounded border border-sky-400 px-2 py-1 text-sm font-semibold focus:outline-none"
+            className="w-full rounded border border-sky-500 px-2 py-1 text-sm font-semibold focus:outline-none"
           />
         ) : (
           <h3
@@ -99,7 +99,7 @@ export default function ListColumn({
             }}
           >
             {list.title}
-            <span className="ml-2 font-normal text-slate-400">
+            <span className="ml-2 font-normal text-slate-500">
               {cards.length}
             </span>
           </h3>
@@ -110,7 +110,7 @@ export default function ListColumn({
             onDeleteList(list.id);
           }}
           onPointerDown={(e) => e.stopPropagation()}
-          className="rounded px-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-red-600"
+          className="rounded px-1.5 text-slate-500 transition hover:bg-slate-200 hover:text-red-600"
           title="리스트 삭제"
         >
           ×
@@ -156,7 +156,7 @@ export default function ListColumn({
               }}
               placeholder="카드 제목 입력..."
               rows={2}
-              className="w-full resize-none rounded-lg border border-sky-400 bg-white p-2 text-sm shadow-sm focus:outline-none"
+              className="w-full resize-none rounded-lg border border-sky-500 bg-white p-2 text-sm shadow-sm focus:outline-none"
             />
             <div className="mt-1 flex gap-2">
               <button

@@ -27,14 +27,18 @@ export function nextPosition(items: { position: number }[]): number {
   return Math.max(...items.map((i) => i.position)) + POSITION_GAP;
 }
 
-/** 보드 테마 색상 */
-export const BOARD_COLORS: Record<string, { header: string; tile: string }> = {
-  sky: { header: "from-sky-600 to-blue-700", tile: "bg-sky-600" },
-  emerald: { header: "from-emerald-600 to-teal-700", tile: "bg-emerald-600" },
-  violet: { header: "from-violet-600 to-purple-700", tile: "bg-violet-600" },
-  rose: { header: "from-rose-500 to-pink-600", tile: "bg-rose-500" },
-  amber: { header: "from-amber-500 to-orange-600", tile: "bg-amber-500" },
-  slate: { header: "from-slate-600 to-slate-800", tile: "bg-slate-600" },
+/**
+ * 보드 테마 색상
+ * - surface: 보드 캔버스 배경 (연한 틴트 — 눈부심 없이 보드를 구분)
+ * - tile: 보드 타일·간트 막대·캘린더 칩 등 흰 글씨가 올라가는 솔리드 색
+ */
+export const BOARD_COLORS: Record<string, { surface: string; tile: string }> = {
+  sky: { surface: "bg-board-sky", tile: "bg-sky-600" },
+  emerald: { surface: "bg-board-emerald", tile: "bg-emerald-600" },
+  violet: { surface: "bg-board-violet", tile: "bg-violet-600" },
+  rose: { surface: "bg-board-rose", tile: "bg-rose-500" },
+  amber: { surface: "bg-board-amber", tile: "bg-amber-500" },
+  slate: { surface: "bg-board-slate", tile: "bg-slate-600" },
 };
 
 export const BOARD_COLOR_KEYS = Object.keys(BOARD_COLORS);
@@ -43,17 +47,17 @@ export function boardColor(color: string) {
   return BOARD_COLORS[color] ?? BOARD_COLORS.sky;
 }
 
-/** 라벨 색상 */
+/** 라벨 색상 (흰 글씨가 올라가므로 대비 확보된 톤) */
 export const LABEL_COLORS: Record<string, string> = {
-  green: "bg-green-500",
-  yellow: "bg-yellow-400",
-  orange: "bg-orange-500",
-  red: "bg-red-500",
-  purple: "bg-purple-500",
-  blue: "bg-blue-500",
-  sky: "bg-sky-400",
-  pink: "bg-pink-400",
-  gray: "bg-gray-400",
+  green: "bg-label-green",
+  yellow: "bg-label-yellow",
+  orange: "bg-label-orange",
+  red: "bg-label-red",
+  purple: "bg-label-purple",
+  blue: "bg-label-blue",
+  sky: "bg-label-sky",
+  pink: "bg-label-pink",
+  gray: "bg-label-gray",
 };
 
 export const LABEL_COLOR_KEYS = Object.keys(LABEL_COLORS);
@@ -64,16 +68,16 @@ export function labelColor(color: string) {
 
 /** 아바타 배경색 (사용자 id 기반 고정) */
 const AVATAR_COLORS = [
-  "bg-red-500",
-  "bg-orange-500",
-  "bg-amber-500",
-  "bg-emerald-500",
-  "bg-teal-500",
-  "bg-sky-500",
-  "bg-blue-500",
-  "bg-violet-500",
-  "bg-fuchsia-500",
-  "bg-rose-500",
+  "bg-avatar-1",
+  "bg-avatar-2",
+  "bg-avatar-3",
+  "bg-avatar-4",
+  "bg-avatar-5",
+  "bg-avatar-6",
+  "bg-avatar-7",
+  "bg-avatar-8",
+  "bg-avatar-9",
+  "bg-avatar-10",
 ];
 
 export function avatarColor(id: string): string {

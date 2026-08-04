@@ -22,17 +22,17 @@ export default function ViewTabs({
   active: ViewKey;
 }) {
   return (
-    <nav className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+    <nav className="flex flex-wrap gap-0.5 rounded-xl bg-slate-100 p-0.5">
       {VIEWS.map((view) => {
         const isActive = view.key === active;
         return (
           <Link
             key={view.key}
             href={`${base}${view.suffix}`}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+            className={`rounded-[0.625rem] px-3 py-1.5 text-sm font-medium transition ${
               isActive
-                ? "bg-sky-600 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             {type === "org" ? view.orgLabel : view.boardLabel}

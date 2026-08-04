@@ -1,26 +1,177 @@
 @import "tailwindcss";
 
+/* ============================================================
+   iOS(애플) 스타일 디자인 토큰
+   - 색 스케일 자체를 교체해 전 화면에 일관 적용된다.
+   - 중립색은 iOS 시스템 그레이 기반, 보조 텍스트는 WCAG AA(4.5:1)를 만족하도록
+     기본 Tailwind 보다 어둡게 잡았다.
+   - 강조색은 iOS 시스템 컬러를 채도만 낮춰 눈부심을 줄였다.
+   ============================================================ */
+
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system,
-    BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕",
-    "Segoe UI", Roboto, sans-serif;
+    BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", "Malgun Gothic",
+    "맑은 고딕", "Segoe UI", Roboto, sans-serif;
+
+  /* ---- 중립 (iOS system gray) ---- */
+  --color-slate-50: #f5f5f7;
+  --color-slate-100: #ebebf0;
+  --color-slate-200: #dedee3;
+  --color-slate-300: #c4c4ca;
+  --color-slate-400: #6e6e75;
+  --color-slate-500: #5a5a60;
+  --color-slate-600: #48484d;
+  --color-slate-700: #38383d;
+  --color-slate-800: #2a2a2e;
+  --color-slate-900: #1c1c1e;
+
+  --color-gray-100: #ebebf0;
+  --color-gray-200: #dedee3;
+  --color-gray-400: #8a8a8f;
+  --color-gray-500: #636369;
+
+  /* ---- 주 강조색 (iOS systemBlue 계열, 대비 보정) ---- */
+  --color-sky-50: #f0f7fe;
+  --color-sky-100: #dfedfb;
+  --color-sky-200: #bfddf8;
+  --color-sky-300: #8fc4f3;
+  --color-sky-400: #5ba9ee;
+  --color-sky-500: #2e90e8;
+  --color-sky-600: #0b72d8;
+  --color-sky-700: #0960b4;
+
+  --color-blue-50: #f0f6fd;
+  --color-blue-100: #e3eefb;
+  --color-blue-200: #c5dcf5;
+  --color-blue-400: #6b9fe0;
+  --color-blue-500: #4a86d6;
+  --color-blue-600: #2e6fc9;
+  --color-blue-700: #1f5fa8;
+
+  /* ---- 상태/보조 강조색 (채도 낮춘 iOS 시스템 컬러) ---- */
+  --color-emerald-50: #eef7f1;
+  --color-emerald-100: #e1f3e8;
+  --color-emerald-500: #3e9d6b;
+  --color-emerald-600: #277a4c;
+  --color-emerald-700: #1f7a47;
+
+  --color-green-500: #3e9d6b;
+  --color-teal-500: #2e8b7f;
+  --color-teal-700: #1f6f66;
+
+  --color-red-50: #fdf0ef;
+  --color-red-100: #fbe6e4;
+  --color-red-200: #f5cdc9;
+  --color-red-400: #dd7a72;
+  --color-red-500: #cf5a50;
+  --color-red-600: #c0392f;
+  --color-red-700: #a32d24;
+
+  --color-amber-50: #fdf6ea;
+  --color-amber-100: #fbf0dc;
+  --color-amber-500: #96701a;
+  --color-amber-600: #a06d18;
+  --color-amber-700: #8a5d15;
+  --color-amber-800: #6f4a11;
+
+  --color-orange-500: #c07723;
+  --color-yellow-400: #c19a1e;
+
+  --color-violet-500: #7a6fd0;
+  --color-violet-600: #6a5fc4;
+  --color-purple-500: #8e5bb5;
+  --color-fuchsia-500: #a054ad;
+  --color-pink-400: #cf6382;
+  --color-pink-600: #b84967;
+  --color-rose-500: #bc4763;
+  --color-rose-600: #b3405c;
+
+  /* ---- 아바타 / 라벨 색 ----
+     흰 글씨가 올라가므로 모두 대비 4.5:1 이상을 만족하는 톤으로 고정했다. */
+  --color-avatar-1: #b0453c;
+  --color-avatar-2: #9c5f1b;
+  --color-avatar-3: #8a6516;
+  --color-avatar-4: #277a4c;
+  --color-avatar-5: #1f7a6e;
+  --color-avatar-6: #1f6fb8;
+  --color-avatar-7: #3f5fb0;
+  --color-avatar-8: #6a5fc4;
+  --color-avatar-9: #8e5bb5;
+  --color-avatar-10: #b34a66;
+
+  --color-label-green: #277a4c;
+  --color-label-yellow: #96701a;
+  --color-label-orange: #b0601f;
+  --color-label-red: #b0453c;
+  --color-label-purple: #8e5bb5;
+  --color-label-blue: #1f6fb8;
+  --color-label-sky: #2e7f96;
+  --color-label-pink: #b34a66;
+  --color-label-gray: #6b6b73;
+
+  /* ---- 보드 배경 틴트 (연한 파스텔) ---- */
+  --color-board-sky: #eef4fb;
+  --color-board-emerald: #edf6f0;
+  --color-board-violet: #f1eefa;
+  --color-board-rose: #fbeef1;
+  --color-board-amber: #fbf4e8;
+  --color-board-slate: #f1f1f4;
+
+  /* ---- iOS 라운드 코너 ---- */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  /* ---- iOS 특유의 옅은 그림자 ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.07);
+  --shadow-2xl: 0 12px 32px rgba(0, 0, 0, 0.1), 0 24px 64px rgba(0, 0, 0, 0.09);
 }
 
 body {
   font-family: var(--font-sans);
+  /* SF Pro 특유의 촘촘한 자간 */
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 보드 가로 스크롤바 */
+/* iOS 처럼 탭 하이라이트 제거 */
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 폼 요소 iOS 톤 정리 */
+input,
+textarea,
+select {
+  background-color: #ffffff;
+  color: var(--color-slate-900);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-slate-400);
+}
+
+/* 보드 가로 스크롤바 (밝은 배경 기준) */
 .board-scroll::-webkit-scrollbar {
   height: 10px;
 }
 .board-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
+  background: transparent;
 }
 .board-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(60, 60, 67, 0.22);
   border-radius: 6px;
+}
+.board-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(60, 60, 67, 0.34);
 }
 
 /* 리스트 세로 스크롤바 */
@@ -31,6 +182,9 @@ body {
   background: transparent;
 }
 .list-scroll::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: rgba(60, 60, 67, 0.2);
   border-radius: 4px;
+}
+.list-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(60, 60, 67, 0.32);
 }

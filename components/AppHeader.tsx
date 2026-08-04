@@ -23,9 +23,12 @@ export default function AppHeader({
   }
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-30 border-b border-black/5 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/orgs" className="text-lg font-bold text-sky-700">
+        <Link
+          href="/orgs"
+          className="text-lg font-bold tracking-tight text-slate-900"
+        >
           업무보드
         </Link>
         <div className="flex items-center gap-3">
@@ -47,7 +50,7 @@ export default function AppHeader({
           </span>
           <button
             onClick={handleSignOut}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100"
+            className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-200"
           >
             로그아웃
           </button>

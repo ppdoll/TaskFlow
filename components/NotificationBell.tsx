@@ -33,13 +33,7 @@ function notificationIcon(type: string): string {
   }
 }
 
-export default function NotificationBell({
-  userId,
-  variant = "light",
-}: {
-  userId: string;
-  variant?: "light" | "dark";
-}) {
+export default function NotificationBell({ userId }: { userId: string }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
@@ -123,9 +117,7 @@ export default function NotificationBell({
   }
 
   const buttonCls =
-    variant === "dark"
-      ? "relative rounded-lg bg-white/10 p-2 text-white transition hover:bg-white/30"
-      : "relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-sky-600";
+    "relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-sky-600";
 
   return (
     <div className="relative">
@@ -160,7 +152,7 @@ export default function NotificationBell({
         <>
           {/* 바깥 클릭 시 닫기 */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+          <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-black/5 bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
               <h3 className="text-sm font-semibold text-slate-700">알림</h3>
               {unread > 0 && (

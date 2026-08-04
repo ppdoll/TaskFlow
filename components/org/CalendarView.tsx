@@ -178,9 +178,9 @@ export default function CalendarView({
                 key={d}
                 className={`py-2 text-center text-xs font-bold ${
                   i === 0
-                    ? "text-red-500"
+                    ? "text-red-600"
                     : i === 6
-                      ? "text-blue-500"
+                      ? "text-blue-600"
                       : "text-slate-500"
                 }`}
               >
@@ -213,7 +213,7 @@ export default function CalendarView({
                           ? "font-bold"
                           : inMonth
                             ? "text-slate-500"
-                            : "text-slate-300"
+                            : "text-slate-400"
                       }`}
                     >
                       <span
