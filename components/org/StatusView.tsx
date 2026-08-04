@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   avatarColor,
-  boardColor,
+  boardTheme,
   formatDate,
   initial,
   isOverdue,
@@ -53,7 +53,10 @@ export default function StatusView({
                     {showBoardName && (
                       <p className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
                         <span
-                          className={`inline-block h-2.5 w-2.5 rounded ${boardColor(card.boards.color).tile}`}
+                          className="inline-block h-2.5 w-2.5 rounded"
+                          style={{
+                            backgroundColor: boardTheme(card.boards.color).tile,
+                          }}
                         />
                         {card.boards.title}
                       </p>

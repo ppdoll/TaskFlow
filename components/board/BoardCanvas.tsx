@@ -21,7 +21,7 @@ import {
 } from "@dnd-kit/sortable";
 import { createClient } from "@/lib/supabase/client";
 import {
-  boardColor,
+  boardTheme,
   nextPosition,
   positionBetween,
   runQuery,
@@ -29,6 +29,7 @@ import {
 import ListColumn from "./ListColumn";
 import CardItem from "./CardItem";
 import CardModal from "./CardModal";
+import BoardSettingsModal from "./BoardSettingsModal";
 import NotificationBell from "@/components/NotificationBell";
 import type { Board, Card, Label, List, OrgMember, Profile } from "@/lib/types";
 
@@ -69,6 +70,8 @@ export default function BoardCanvas({
   const [labels, setLabels] = useState<Label[]>(initialLabels);
   const [boardTitle, setBoardTitle] = useState(board.title);
   const [editingBoardTitle, setEditingBoardTitle] = useState(false);
+  const [boardColorValue, setBoardColorValue] = useState(board.color);
+  const [showBoardSettings, setShowBoardSettings] = useState(false);
 
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [activeList, setActiveList] = useState<List | null>(null);
@@ -565,9 +568,22 @@ export default function BoardCanvas({
     router.push(`/orgs/${board.org_id}`);
   }
 
+  function handleSaveBoardSettings(title: string, color: string) {
+    setBoardTitle(title);
+    setBoardColorValue(color);
+    setShowBoardSettings(false);
+    runQuery(
+      supabase.from("boards").update({ title, color }).eq("id", board.id)
+    );
+    router.refresh();
+  }
+
+  const theme = boardTheme(boardColorValue);
+
   return (
     <div
-      className={`flex h-screen flex-col ${boardColor(board.color).surface}`}
+      className="flex h-screen flex-col"
+      style={{ backgroundColor: theme.surface }}
     >
       {/* 보드 헤더 */}
       <header className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-black/5 bg-white/70 px-4 py-2.5 backdrop-blur-xl">
@@ -627,10 +643,11 @@ export default function BoardCanvas({
           도움말
         </Link>
         <button
-          onClick={handleDeleteBoard}
-          className="rounded-lg px-2.5 py-1.5 text-sm text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+          onClick={() => setShowBoardSettings(true)}
+          className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-200 hover:text-slate-900"
+          title="보드 이름·색상 변경"
         >
-          보드 삭제
+          ⚙️ 보드 수정
         </button>
       </header>
 
@@ -756,6 +773,16 @@ export default function BoardCanvas({
           onCreateLabel={handleCreateLabel}
           onDeleteLabel={handleDeleteLabel}
           onAttachmentDelta={handleAttachmentDelta}
+        />
+      )}
+
+      {showBoardSettings && (
+        <BoardSettingsModal
+          initialTitle={boardTitle}
+          initialColor={boardColorValue}
+          onClose={() => setShowBoardSettings(false)}
+          onSave={handleSaveBoardSettings}
+          onDelete={handleDeleteBoard}
         />
       )}
     </div>

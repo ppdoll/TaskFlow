@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { boardColor, STATUS_LABELS, STATUS_ORDER } from "@/lib/utils";
+import { boardTheme, STATUS_LABELS, STATUS_ORDER } from "@/lib/utils";
 import type { ScopedCard } from "@/lib/types";
 
 const MS_DAY = 86400000;
@@ -227,20 +227,27 @@ export default function CalendarView({
                       </span>
                     </p>
                     <div className="space-y-1">
-                      {visible.map((card) => (
-                        <Link
-                          key={card.id}
-                          href={`/board/${card.board_id}?card=${card.id}`}
-                          title={`${card.boards.title} · ${card.title} (${STATUS_LABELS[card.status] ?? card.status})`}
-                          className={`block truncate rounded px-1.5 py-0.5 text-[11px] font-medium text-white transition hover:opacity-80 ${boardColor(card.boards.color).tile} ${
-                            card.status === "done"
-                              ? "opacity-50 line-through"
-                              : ""
-                          }`}
-                        >
-                          {card.title}
-                        </Link>
-                      ))}
+                      {visible.map((card) => {
+                        const t = boardTheme(card.boards.color);
+                        return (
+                          <Link
+                            key={card.id}
+                            href={`/board/${card.board_id}?card=${card.id}`}
+                            title={`${card.boards.title} · ${card.title} (${STATUS_LABELS[card.status] ?? card.status})`}
+                            style={{
+                              backgroundColor: t.tile,
+                              color: t.onTile,
+                            }}
+                            className={`block truncate rounded px-1.5 py-0.5 text-[11px] font-medium transition hover:opacity-80 ${
+                              card.status === "done"
+                                ? "opacity-50 line-through"
+                                : ""
+                            }`}
+                          >
+                            {card.title}
+                          </Link>
+                        );
+                      })}
                       {hidden > 0 && (
                         <button
                           onClick={() => toggleExpand(key)}

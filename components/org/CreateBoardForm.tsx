@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { BOARD_COLOR_KEYS, BOARD_COLORS } from "@/lib/utils";
+import BoardColorPicker from "@/components/board/BoardColorPicker";
 
 export default function CreateBoardForm({ orgId }: { orgId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [color, setColor] = useState("sky");
+  const [color, setColor] = useState("ocean");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,8 +58,8 @@ export default function CreateBoardForm({ orgId }: { orgId: string }) {
       onSubmit={handleSubmit}
       className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-2 xl:col-span-3"
     >
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-48 flex-1">
+      <div className="space-y-4">
+        <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
             보드 이름
           </label>
@@ -74,24 +74,10 @@ export default function CreateBoardForm({ orgId }: { orgId: string }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
-            색상
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            테마 색상
           </label>
-          <div className="flex gap-1.5">
-            {BOARD_COLOR_KEYS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setColor(key)}
-                className={`h-8 w-8 rounded-lg ${BOARD_COLORS[key].tile} ${
-                  color === key
-                    ? "ring-2 ring-slate-800 ring-offset-1"
-                    : "opacity-70 hover:opacity-100"
-                }`}
-                aria-label={key}
-              />
-            ))}
-          </div>
+          <BoardColorPicker value={color} onChange={setColor} />
         </div>
         <div className="flex gap-2">
           <button

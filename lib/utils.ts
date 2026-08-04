@@ -27,24 +27,117 @@ export function nextPosition(items: { position: number }[]): number {
   return Math.max(...items.map((i) => i.position)) + POSITION_GAP;
 }
 
-/**
- * 보드 테마 색상
- * - surface: 보드 캔버스 배경 (연한 틴트 — 눈부심 없이 보드를 구분)
- * - tile: 보드 타일·간트 막대·캘린더 칩 등 흰 글씨가 올라가는 솔리드 색
- */
-export const BOARD_COLORS: Record<string, { surface: string; tile: string }> = {
-  sky: { surface: "bg-board-sky", tile: "bg-sky-600" },
-  emerald: { surface: "bg-board-emerald", tile: "bg-emerald-600" },
-  violet: { surface: "bg-board-violet", tile: "bg-violet-600" },
-  rose: { surface: "bg-board-rose", tile: "bg-rose-500" },
-  amber: { surface: "bg-board-amber", tile: "bg-amber-500" },
-  slate: { surface: "bg-board-slate", tile: "bg-slate-600" },
+/* ============================================================
+   보드 테마 색상
+   boards.color 에는 프리셋 키("ocean") 또는 임의의 HEX("#0F4C81") 가 저장된다.
+   어떤 색이 들어와도 읽히도록 배경 틴트와 글자색을 명도에서 계산한다.
+   ============================================================ */
+
+export interface BoardPreset {
+  key: string;
+  name: string;
+  tile: string;
+}
+
+/** 첨부된 컬러 팔레트를 기반으로 한 보드 테마 프리셋 */
+export const BOARD_PRESETS: BoardPreset[] = [
+  { key: "ocean", name: "오션 브리즈", tile: "#0F4C81" },
+  { key: "tropical", name: "트로피컬", tile: "#157E8C" },
+  { key: "earth", name: "어스 & 네이처", tile: "#606C38" },
+  { key: "autumn", name: "웜 어텀", tile: "#A44A3F" },
+  { key: "sunset", name: "선셋 글로우", tile: "#C0503F" },
+  { key: "royal", name: "로열 엘레강스", tile: "#C21230" },
+  { key: "pastel", name: "소프트 파스텔", tile: "#A8607A" },
+  { key: "neon", name: "사이버 네온", tile: "#8B4BD6" },
+  { key: "luxury", name: "모던 럭셔리", tile: "#1F2937" },
+  { key: "mono", name: "미니멀 모노", tile: "#3A3A3A" },
+];
+
+/** 초기 버전에서 쓰던 색 키 (기존 보드 호환용) */
+const LEGACY_BOARD_COLORS: Record<string, string> = {
+  sky: "#0B72D8",
+  emerald: "#277A4C",
+  violet: "#6A5FC4",
+  rose: "#BC4763",
+  amber: "#96701A",
+  slate: "#48484D",
 };
 
-export const BOARD_COLOR_KEYS = Object.keys(BOARD_COLORS);
+const HEX_RE = /^#([0-9a-f]{6})$/i;
 
-export function boardColor(color: string) {
-  return BOARD_COLORS[color] ?? BOARD_COLORS.sky;
+export function isHexColor(value: string): boolean {
+  return HEX_RE.test(value.trim());
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const v = hex.replace("#", "");
+  return [
+    parseInt(v.slice(0, 2), 16),
+    parseInt(v.slice(2, 4), 16),
+    parseInt(v.slice(4, 6), 16),
+  ];
+}
+
+function toHex([r, g, b]: [number, number, number]): string {
+  const p = (n: number) =>
+    Math.max(0, Math.min(255, Math.round(n)))
+      .toString(16)
+      .padStart(2, "0");
+  return `#${p(r)}${p(g)}${p(b)}`;
+}
+
+/** WCAG 상대 휘도 */
+function relativeLuminance([r, g, b]: [number, number, number]): number {
+  const f = (v: number) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+}
+
+function contrastWith(lum: number, other: number): number {
+  const [hi, lo] = lum > other ? [lum, other] : [other, lum];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/** 흰색과 비율만큼 섞는다 (amount = 흰색 비중) */
+function mixWhite(rgb: [number, number, number], amount: number) {
+  return rgb.map((c) => c + (255 - c) * amount) as [number, number, number];
+}
+
+export interface BoardTheme {
+  /** 보드 타일·간트 막대·캘린더 칩 등 솔리드 색 */
+  tile: string;
+  /** 보드 캔버스 배경 (아주 연한 틴트) */
+  surface: string;
+  /** tile 위에 올릴 글자색 — 대비가 높은 쪽으로 자동 선택 */
+  onTile: string;
+}
+
+/** boards.color 값을 실제 색으로 해석한다 (프리셋 키 / HEX / 레거시 키 모두 허용) */
+export function boardTheme(color: string | null | undefined): BoardTheme {
+  const raw = (color ?? "").trim();
+  const hex = isHexColor(raw)
+    ? raw
+    : (BOARD_PRESETS.find((p) => p.key === raw)?.tile ??
+      LEGACY_BOARD_COLORS[raw] ??
+      BOARD_PRESETS[0].tile);
+
+  const rgb = hexToRgb(hex);
+  const lum = relativeLuminance(rgb);
+
+  // 밝은 색을 고르면 흰 글씨가 안 보이므로 대비가 높은 쪽을 쓴다
+  const onTile =
+    contrastWith(lum, 1) >= contrastWith(lum, 0) ? "#ffffff" : "#1c1c1e";
+
+  // 아주 밝은 색은 틴트를 덜 섞어야 배경이 흰색과 구분된다
+  const surfaceMix = lum > 0.6 ? 0.72 : 0.93;
+
+  return {
+    tile: hex,
+    surface: toHex(mixWhite(rgb, surfaceMix)),
+    onTile,
+  };
 }
 
 /** 라벨 색상 (흰 글씨가 올라가므로 대비 확보된 톤) */

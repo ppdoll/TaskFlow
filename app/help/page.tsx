@@ -146,6 +146,12 @@ export default function HelpPage() {
         <Section emoji="📋" title="보드 사용법">
           <ul className="space-y-3 text-sm leading-6 text-slate-600">
             <li>
+              <strong>보드 수정</strong> — 보드 화면 오른쪽 위{" "}
+              <span className={kbd}>⚙️ 보드 수정</span>에서 보드 이름과 테마
+              색상을 바꿀 수 있습니다. 10가지 팔레트 중에 고르거나 원하는 색을
+              직접 지정할 수 있고, 글자색은 배경에 맞춰 자동으로 조정됩니다.
+            </li>
+            <li>
               <strong>리스트</strong> — 업무 단계를 나타내는 세로 컬럼입니다.
               보통 <span className={kbd}>할 일</span> →{" "}
               <span className={kbd}>진행 중</span> →{" "}

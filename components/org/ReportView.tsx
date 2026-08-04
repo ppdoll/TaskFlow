@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   activityText,
   avatarColor,
-  boardColor,
+  boardTheme,
   formatDate,
   initial,
   isOverdue,
@@ -358,7 +358,8 @@ export default function ReportView({
                     className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-sky-700 hover:underline"
                   >
                     <span
-                      className={`inline-block h-2.5 w-2.5 rounded ${boardColor(b.color).tile}`}
+                      className="inline-block h-2.5 w-2.5 rounded"
+                      style={{ backgroundColor: boardTheme(b.color).tile }}
                     />
                     {b.title}
                     <span className="text-xs font-normal text-slate-400">
@@ -401,7 +402,10 @@ export default function ReportView({
                     className="flex items-center gap-3 py-2.5 transition hover:bg-slate-50"
                   >
                     <span
-                      className={`inline-block h-2.5 w-2.5 shrink-0 rounded ${boardColor(card.boards.color).tile}`}
+                      className="inline-block h-2.5 w-2.5 shrink-0 rounded"
+                      style={{
+                        backgroundColor: boardTheme(card.boards.color).tile,
+                      }}
                     />
                     <span className="min-w-0 flex-1 truncate text-sm text-slate-700">
                       {card.title}

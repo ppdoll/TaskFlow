@@ -109,14 +109,6 @@
   --color-label-pink: #b34a66;
   --color-label-gray: #6b6b73;
 
-  /* ---- 보드 배경 틴트 (연한 파스텔) ---- */
-  --color-board-sky: #eef4fb;
-  --color-board-emerald: #edf6f0;
-  --color-board-violet: #f1eefa;
-  --color-board-rose: #fbeef1;
-  --color-board-amber: #fbf4e8;
-  --color-board-slate: #f1f1f4;
-
   /* ---- iOS 라운드 코너 ---- */
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;

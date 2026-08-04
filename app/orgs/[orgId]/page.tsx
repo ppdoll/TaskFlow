@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
 import CreateBoardForm from "@/components/org/CreateBoardForm";
-import { avatarColor, boardColor, initial, ROLE_LABELS } from "@/lib/utils";
+import { avatarColor, boardTheme, initial, ROLE_LABELS } from "@/lib/utils";
 import type { Board, OrgMember } from "@/lib/types";
 
 export default async function OrgPage({
@@ -73,15 +73,47 @@ export default async function OrgPage({
           <section>
             <h2 className="mb-4 text-lg font-semibold">보드</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {boardRows.map((board) => (
-                <Link
-                  key={board.id}
-                  href={`/board/${board.id}`}
-                  className={`flex h-28 items-start rounded-xl ${boardColor(board.color).tile} p-4 text-white shadow-sm transition hover:opacity-90 hover:shadow-md`}
-                >
-                  <span className="font-semibold">{board.title}</span>
-                </Link>
-              ))}
+              {boardRows.map((board) => {
+                const theme = boardTheme(board.color);
+                const isOwner = board.created_by === user.id;
+                const ownerName = board.created_by
+                  ? memberRows.find((m) => m.user_id === board.created_by)
+                      ?.profiles?.name
+                  : null;
+                return (
+                  <Link
+                    key={board.id}
+                    href={`/board/${board.id}`}
+                    className="flex h-28 flex-col justify-between rounded-xl p-4 shadow-sm transition hover:opacity-90 hover:shadow-md"
+                    style={{
+                      backgroundColor: theme.tile,
+                      color: theme.onTile,
+                    }}
+                  >
+                    <span className="font-semibold">{board.title}</span>
+                    <span className="flex items-center gap-1.5">
+                      {isOwner ? (
+                        <span
+                          className="rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style={{
+                            backgroundColor: theme.onTile,
+                            color: theme.tile,
+                          }}
+                          title="내가 만든 보드입니다"
+                        >
+                          소유주
+                        </span>
+                      ) : (
+                        ownerName && (
+                          <span className="text-xs opacity-80">
+                            {ownerName}
+                          </span>
+                        )
+                      )}
+                    </span>
+                  </Link>
+                );
+              })}
               <CreateBoardForm orgId={orgId} />
             </div>
           </section>

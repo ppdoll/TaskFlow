@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import {
-  boardColor,
+  boardTheme,
   runQuery,
   STATUS_LABELS,
   STATUS_STYLES,
@@ -48,28 +48,33 @@ function buildTimeline(cards: TimelineCard[]): TimelineModel | null {
     .sort((a, b) => a.start_at!.localeCompare(b.start_at!));
   if (scheduled.length === 0) return null;
 
-  const now = new Date();
   const startOfDay = (d: Date) =>
     new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+  // 좌표는 '일' 단위로만 의미가 있으므로 오늘 0시로 맞춘다.
+  // (서버와 브라우저가 각자 현재 시각을 계산하면 hydration 이 어긋난다)
+  const today = startOfDay(new Date());
+  // 종료 시간이 없는 카드는 오늘 끝까지 이어지는 것으로 본다
+  const openEnd = today.getTime() + MS_DAY;
 
   const starts = scheduled.map((c) => new Date(c.start_at!).getTime());
   const ends = scheduled.map((c) =>
     Math.max(
-      new Date(c.end_at ?? now.toISOString()).getTime(),
+      c.end_at ? new Date(c.end_at).getTime() : openEnd,
       new Date(c.start_at!).getTime()
     )
   );
 
   const rangeStart = startOfDay(new Date(Math.min(...starts) - MS_DAY));
   const rangeEnd = startOfDay(
-    new Date(Math.max(...ends, now.getTime()) + 2 * MS_DAY)
+    new Date(Math.max(...ends, today.getTime()) + 2 * MS_DAY)
   );
   const totalDays =
     Math.round((rangeEnd.getTime() - rangeStart.getTime()) / MS_DAY) + 1;
 
   const days: TimelineModel["days"] = [];
   const months: TimelineModel["months"] = [];
-  const todayKey = startOfDay(now).getTime();
+  const todayKey = today.getTime();
   for (let i = 0; i < totalDays; i++) {
     const d = new Date(rangeStart.getTime() + i * MS_DAY);
     days.push({
@@ -90,7 +95,7 @@ function buildTimeline(cards: TimelineCard[]): TimelineModel | null {
   for (const card of scheduled) {
     const start = new Date(card.start_at!).getTime();
     const end = Math.max(
-      new Date(card.end_at ?? now.toISOString()).getTime(),
+      card.end_at ? new Date(card.end_at).getTime() : openEnd,
       start + MS_DAY / 4
     );
     let group = byBoard.get(card.board_id);
@@ -115,7 +120,8 @@ function buildTimeline(cards: TimelineCard[]): TimelineModel | null {
     days,
     months,
     boards: [...byBoard.values()],
-    todayLeft: toX(now.getTime()),
+    // 오늘 칸의 가운데에 선을 긋는다
+    todayLeft: toX(today.getTime() + MS_DAY / 2),
   };
 }
 
@@ -148,7 +154,8 @@ function UnscheduledRow({
   return (
     <li className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
       <span
-        className={`inline-block h-2.5 w-2.5 shrink-0 rounded ${boardColor(card.boards.color).tile}`}
+        className="inline-block h-2.5 w-2.5 shrink-0 rounded"
+        style={{ backgroundColor: boardTheme(card.boards.color).tile }}
         title={card.boards.title}
       />
       <div className="min-w-0 flex-1 basis-48">
@@ -339,7 +346,8 @@ export default function TimelineView({
                       style={{ width: LABEL_W }}
                     >
                       <span
-                        className={`inline-block h-2.5 w-2.5 rounded ${boardColor(group.color).tile}`}
+                        className="inline-block h-2.5 w-2.5 rounded"
+                        style={{ backgroundColor: boardTheme(group.color).tile }}
                       />
                       {group.title}
                     </div>
@@ -378,10 +386,15 @@ export default function TimelineView({
                         />
                         <Link
                           href={`/board/${card.board_id}?card=${card.id}`}
-                          className={`absolute top-1.5 flex h-6 items-center truncate rounded-md px-2 text-[11px] font-semibold text-white shadow-sm transition hover:opacity-85 ${boardColor(group.color).tile} ${
+                          className={`absolute top-1.5 flex h-6 items-center truncate rounded-md px-2 text-[11px] font-semibold shadow-sm transition hover:opacity-85 ${
                             card.status === "done" ? "opacity-60" : ""
                           } ${ongoing ? "rounded-r-none border-r-2 border-dashed border-white/70" : ""}`}
-                          style={{ left, width }}
+                          style={{
+                            left,
+                            width,
+                            backgroundColor: boardTheme(group.color).tile,
+                            color: boardTheme(group.color).onTile,
+                          }}
                           title={`${card.title} (${STATUS_LABELS[card.status] ?? card.status}${ongoing ? " · 진행 중" : ""})`}
                         >
                           {card.title}
