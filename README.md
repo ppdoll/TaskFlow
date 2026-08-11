@@ -21,6 +21,7 @@
    2. [`supabase/notifications.sql`](supabase/notifications.sql) — 인앱 알림
    3. [`supabase/attachments.sql`](supabase/attachments.sql) — 첨부 (파일/링크 + 스토리지)
    4. [`supabase/card-status.sql`](supabase/card-status.sql) — 카드 상태 + 작업 시간
+   5. [`supabase/due-reminders.sql`](supabase/due-reminders.sql) — 마감 임박 알림 (pg_cron)
 3. **Authentication > Sign In / Providers > Email** 에서:
    - 빠르게 시작하려면 **Confirm email 을 끄세요** (이메일 인증 없이 즉시 가입).
    - 이메일 인증을 유지하려면 SMTP 설정이 필요합니다 (기본 내장 메일은 시간당 발송 제한이 있음).
@@ -90,6 +91,10 @@ F5 만으로 전체 기능(가입 → 조직 → 초대 → 보드 → 실시간
 
 내가 담당자로 지정되거나, 내가 담당한 카드가 다른 리스트로 이동되면 화면 오른쪽 위
 종 아이콘에 실시간으로 알림이 옵니다. 알림 클릭 시 해당 카드가 바로 열립니다.
+
+**마감 임박 알림** — 매일 오전 9시(KST)에 pg_cron 이 돌면서 마감이 **7일 / 1일 / 0일**
+남은 카드의 담당자에게 알림을 보냅니다. 담당자가 없으면 카드를 만든 사람에게 갑니다.
+같은 카드·같은 D-day 로는 한 번만 발송되며, 완료된 카드는 제외됩니다.
 
 > **설치**: [`supabase/schema.sql`](supabase/schema.sql) 실행 후
 > [`supabase/notifications.sql`](supabase/notifications.sql) 도 SQL Editor 에서 실행해야 합니다.

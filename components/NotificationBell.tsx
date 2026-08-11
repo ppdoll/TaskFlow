@@ -15,6 +15,11 @@ function notificationText(n: Notification): string {
       return `${d.actor_name} 님이 '${d.card_title}' 업무를 '${d.from}' → '${d.to}' 로 이동했습니다.`;
     case "status_changed":
       return `${d.actor_name} 님이 '${d.card_title}' 상태를 '${statusLabel(d.from ?? "?")}' → '${statusLabel(d.to ?? "?")}' 로 변경했습니다.`;
+    case "due_soon": {
+      const days = Number(d.days_left ?? 0);
+      if (days <= 0) return `'${d.card_title}' 마감일이 오늘입니다.`;
+      return `'${d.card_title}' 마감이 ${days}일 남았습니다. (${d.due_date})`;
+    }
     default:
       return n.type;
   }
@@ -28,6 +33,8 @@ function notificationIcon(type: string): string {
       return "↔️";
     case "status_changed":
       return "⚡";
+    case "due_soon":
+      return "⏰";
     default:
       return "🔔";
   }

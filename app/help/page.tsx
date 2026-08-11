@@ -255,6 +255,11 @@ export default function HelpPage() {
               할 일 → 진행 중).
             </li>
             <li>
+              <strong>마감 임박 알림</strong> — 마감이 <strong>7일 · 1일 · 당일</strong>
+              남은 업무는 매일 아침 자동으로 알려줍니다. 담당자가 지정돼 있으면
+              담당자에게, 없으면 카드를 만든 사람에게 갑니다.
+            </li>
+            <li>
               알림을 <strong>클릭하면 해당 업무 카드가 바로 열립니다</strong>.
               &ldquo;모두 읽음&rdquo;으로 한 번에 정리할 수 있습니다.
             </li>

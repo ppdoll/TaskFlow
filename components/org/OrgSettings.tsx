@@ -122,6 +122,40 @@ export default function OrgSettings({
     return null;
   }
 
+  // --- 조직 삭제 (조직장 전용) ---
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function deleteOrganization() {
+    if (deleteConfirm.trim() !== org.name) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    // RLS 에 막히면 에러 없이 0건 삭제로 끝나므로 실제 삭제 여부를 확인한다
+    const { data, error } = await supabase
+      .from("organizations")
+      .delete()
+      .eq("id", org.id)
+      .select("id");
+
+    if (error) {
+      setDeleting(false);
+      setDeleteError(`삭제 실패: ${error.message}`);
+      return;
+    }
+    if (!data || data.length === 0) {
+      setDeleting(false);
+      setDeleteError(
+        "삭제되지 않았습니다. 조직장 권한이 있는지 확인해주세요."
+      );
+      return;
+    }
+    router.push("/orgs");
+    router.refresh();
+  }
+
   // --- 멤버 관리 ---
   async function changeRole(userId: string, role: string) {
     const { error } = await supabase
@@ -374,6 +408,65 @@ export default function OrgSettings({
           ))}
         </ul>
       </section>
+
+      {/* 조직 삭제 (조직장 전용) */}
+      {myRole === "owner" && (
+        <section className="rounded-xl border border-red-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-1 text-lg font-semibold text-red-600">조직 삭제</h2>
+          <p className="mb-4 text-sm leading-6 text-slate-600">
+            조직을 삭제하면 <strong>모든 보드·리스트·카드·첨부·댓글</strong>이
+            함께 삭제되며 되돌릴 수 없습니다. 멤버 {members.length}명의 접근도
+            즉시 사라집니다.
+          </p>
+
+          {!deleteOpen ? (
+            <button
+              onClick={() => setDeleteOpen(true)}
+              className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            >
+              조직 삭제하기
+            </button>
+          ) : (
+            <div className="space-y-3 rounded-lg bg-red-50 p-4">
+              <p className="text-sm text-slate-700">
+                확인을 위해 조직 이름{" "}
+                <strong className="font-mono">{org.name}</strong> 을(를) 그대로
+                입력하세요.
+              </p>
+              <input
+                type="text"
+                autoFocus
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder={org.name}
+                className="w-full rounded-lg border border-red-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
+              />
+              {deleteError && (
+                <p className="text-sm text-red-600">{deleteError}</p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={deleteOrganization}
+                  disabled={deleteConfirm.trim() !== org.name || deleting}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-40"
+                >
+                  {deleting ? "삭제 중..." : "영구 삭제"}
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    setDeleteConfirm("");
+                    setDeleteError(null);
+                  }}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-100"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
