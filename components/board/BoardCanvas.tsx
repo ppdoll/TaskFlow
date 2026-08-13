@@ -30,6 +30,11 @@ import ListColumn from "./ListColumn";
 import CardItem from "./CardItem";
 import CardModal from "./CardModal";
 import BoardSettingsModal from "./BoardSettingsModal";
+import BoardFilter, {
+  FILTER_ALL,
+  FILTER_NONE,
+  matchesAssigneeFilter,
+} from "./BoardFilter";
 import NotificationBell from "@/components/NotificationBell";
 import type { Board, Card, Label, List, OrgMember, Profile } from "@/lib/types";
 
@@ -88,6 +93,7 @@ export default function BoardCanvas({
 
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
+  const [assigneeFilter, setAssigneeFilter] = useState<string>(FILTER_ALL);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -110,10 +116,23 @@ export default function BoardCanvas({
     const map = new Map<string, Card[]>();
     for (const list of lists) map.set(list.id, []);
     for (const card of sortByPosition(cards)) {
+      if (!matchesAssigneeFilter(card, assigneeFilter)) continue;
       map.get(card.list_id)?.push(card);
     }
     return map;
-  }, [lists, cards]);
+  }, [lists, cards, assigneeFilter]);
+
+  const filterCounts = useMemo(() => {
+    const byUser: Record<string, number> = {};
+    let none = 0;
+    for (const card of cards) {
+      if (card.assigneeIds.length === 0) none++;
+      for (const id of card.assigneeIds) {
+        byUser[id] = (byUser[id] ?? 0) + 1;
+      }
+    }
+    return { all: cards.length, none, byUser };
+  }, [cards]);
 
   const selectedCard = selectedCardId
     ? (cards.find((c) => c.id === selectedCardId) ?? null)
@@ -286,7 +305,11 @@ export default function BoardCanvas({
       if (!targetListId || activeItem.list_id === targetListId) return prev;
 
       // 다른 리스트로 이동 (일단 맨 끝에 배치, 최종 위치는 dragEnd 에서 확정)
-      const targetCards = prev.filter((c) => c.list_id === targetListId);
+      // 필터가 걸려 있으면 화면에 보이는 카드 기준으로 계산해야 위치가 어긋나지 않는다
+      const targetCards = prev.filter(
+        (c) =>
+          c.list_id === targetListId && matchesAssigneeFilter(c, assigneeFilter)
+      );
       const pos = nextPosition(targetCards);
       return prev.map((c) =>
         c.id === activeId ? { ...c, list_id: targetListId!, position: pos } : c
@@ -336,8 +359,13 @@ export default function BoardCanvas({
           cards.find((c) => c.id === overId)?.list_id ?? targetListId;
       }
 
+      // 화면에 보이는 카드끼리의 순서로 위치를 정한다 (필터 적용 시 WYSIWYG 유지)
       const siblings = sortByPosition(
-        cards.filter((c) => c.list_id === targetListId)
+        cards.filter(
+          (c) =>
+            c.list_id === targetListId &&
+            matchesAssigneeFilter(c, assigneeFilter)
+        )
       );
       const oldIndex = siblings.findIndex((c) => c.id === activeId);
       if (oldIndex < 0) return;
@@ -421,14 +449,34 @@ export default function BoardCanvas({
       .single();
     if (data) {
       const row = data as CardRow;
+      // 특정 담당자로 걸러 보는 중이면, 만든 카드가 바로 사라지지 않도록
+      // 그 담당자를 자동으로 지정한다
+      const autoAssignee =
+        assigneeFilter !== FILTER_ALL && assigneeFilter !== FILTER_NONE
+          ? assigneeFilter
+          : null;
+
       setCards((prev) =>
         prev.some((c) => c.id === row.id)
           ? prev
           : [
               ...prev,
-              { ...row, assigneeIds: [], labelIds: [], attachmentCount: 0 },
+              {
+                ...row,
+                assigneeIds: autoAssignee ? [autoAssignee] : [],
+                labelIds: [],
+                attachmentCount: 0,
+              },
             ]
       );
+
+      if (autoAssignee) {
+        runQuery(
+          supabase
+            .from("card_assignees")
+            .insert({ card_id: row.id, user_id: autoAssignee })
+        );
+      }
     }
   }
 
@@ -617,6 +665,12 @@ export default function BoardCanvas({
             {boardTitle}
           </h1>
         )}
+        <BoardFilter
+          members={members}
+          value={assigneeFilter}
+          onChange={setAssigneeFilter}
+          counts={filterCounts}
+        />
         <span className="flex-1" />
         <nav className="flex gap-0.5 rounded-lg bg-slate-100 p-0.5 text-sm">
           {[

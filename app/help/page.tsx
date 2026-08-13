@@ -168,6 +168,14 @@ export default function HelpPage() {
               옮길 수 있습니다.
             </li>
             <li>
+              <strong>담당자로 걸러 보기</strong> — 보드 상단의{" "}
+              <span className={kbd}>👤 전체</span> 를 눌러 특정 담당자의 업무만
+              볼 수 있습니다. 기본은 전체이고,{" "}
+              <span className={kbd}>담당자 없음</span> 으로 아직 배정되지 않은
+              업무만 모아 볼 수도 있습니다. 필터를 건 상태에서 카드를 추가하면
+              그 담당자가 자동으로 지정됩니다.
+            </li>
+            <li>
               <strong>실시간 동기화</strong> — 팀원이 카드를 옮기거나 수정하면{" "}
               <em>새로고침 없이</em> 내 화면에 즉시 반영됩니다.
             </li>
