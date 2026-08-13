@@ -230,6 +230,13 @@ export default function HelpPage() {
               보드의 업무만 표시됩니다.
             </li>
             <li>
+              <strong>담당자 필터</strong> — 네 가지 보기 모두 오른쪽 위{" "}
+              <span className={kbd}>👤 전체</span> 로 담당자를 골라 볼 수
+              있습니다. <strong>보기를 바꿔도 필터가 유지</strong>되고, 주소가
+              함께 바뀌므로 &ldquo;○○님 일정&rdquo; 링크를 그대로 공유할 수도
+              있습니다.
+            </li>
+            <li>
               <strong>📊 상태별</strong> — 업무를 준비/진행/완료 컬럼으로
               한눈에 봅니다.
             </li>

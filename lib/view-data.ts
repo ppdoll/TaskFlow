@@ -1,5 +1,32 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { ScopedCard } from "@/lib/types";
+import type { OrgMember, ScopedCard } from "@/lib/types";
+import { matchesAssignee } from "@/lib/utils";
+
+/** 담당자 필터 적용 */
+export function filterByAssignee(
+  cards: ScopedCard[],
+  filter: string
+): ScopedCard[] {
+  return cards.filter((c) =>
+    matchesAssignee(
+      c.card_assignees.map((a) => a.user_id),
+      filter
+    )
+  );
+}
+
+/** 담당자별 카드 수 (필터 드롭다운에 표시) */
+export function assigneeCounts(cards: ScopedCard[]) {
+  const byUser: Record<string, number> = {};
+  let none = 0;
+  for (const card of cards) {
+    if (card.card_assignees.length === 0) none++;
+    for (const a of card.card_assignees) {
+      byUser[a.user_id] = (byUser[a.user_id] ?? 0) + 1;
+    }
+  }
+  return { all: cards.length, none, byUser };
+}
 
 export interface ViewScope {
   orgId?: string;
@@ -23,6 +50,19 @@ export async function fetchScopedCards(
   }
   const { data } = await query.order("created_at", { ascending: true });
   return (data ?? []) as unknown as ScopedCard[];
+}
+
+/** 조직 멤버 목록 (담당자 필터·아바타 표시용) */
+export async function fetchOrgMembers(
+  supabase: SupabaseClient,
+  orgId: string
+): Promise<OrgMember[]> {
+  const { data } = await supabase
+    .from("organization_members")
+    .select("*, profiles(id, email, name)")
+    .eq("org_id", orgId)
+    .order("joined_at", { ascending: true });
+  return (data ?? []) as unknown as OrgMember[];
 }
 
 /** 범위 내 멤버 이름 매핑 (user_id -> name) */
@@ -103,17 +143,35 @@ function sevenDaysAgoIso(): string {
 /** 보고서용 최근 활동 + 최근 7일 집계 */
 export async function fetchReportData(
   supabase: SupabaseClient,
-  scope: ViewScope
+  scope: ViewScope,
+  /** 담당자 필터가 걸린 경우, 그 담당자의 카드 id 목록으로 활동도 제한한다 */
+  cardIds?: string[] | null
 ): Promise<{ activities: ReportActivity[]; counts: ReportCounts }> {
   const since = sevenDaysAgoIso();
+
+  // 필터 결과가 0건이면 활동도 0건 (빈 in() 은 조건이 무시되므로 미리 처리)
+  if (cardIds && cardIds.length === 0) {
+    return {
+      activities: [],
+      counts: { done7: 0, created7: 0, updated7: 0 },
+    };
+  }
 
   const applyScope = <Q,>(query: Q): Q => {
     const builder = query as unknown as {
       eq: (column: string, value: string) => unknown;
+      in: (column: string, values: string[]) => unknown;
     };
-    if (scope.boardId) return builder.eq("board_id", scope.boardId) as Q;
-    if (scope.orgId) return builder.eq("boards.org_id", scope.orgId) as Q;
-    return query;
+    let out: unknown = query;
+    if (scope.boardId) out = builder.eq("board_id", scope.boardId);
+    else if (scope.orgId) out = builder.eq("boards.org_id", scope.orgId);
+    if (cardIds) {
+      out = (out as { in: (c: string, v: string[]) => unknown }).in(
+        "card_id",
+        cardIds
+      );
+    }
+    return out as Q;
   };
 
   const [feedRes, doneRes, createdRes, updatedRes] = await Promise.all([

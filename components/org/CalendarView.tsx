@@ -36,33 +36,21 @@ function cardRange(card: ScopedCard): { from: Date; to: Date } | null {
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-export default function CalendarView({
-  cards,
-  namesById,
-}: {
-  cards: ScopedCard[];
-  namesById: Record<string, string>;
-}) {
+export default function CalendarView({ cards }: { cards: ScopedCard[] }) {
   const [today] = useState(getToday);
   const [month, setMonth] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1)
   );
   const [statusFilter, setStatusFilter] = useState("all");
-  const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
+  // 담당자 필터는 상위(URL 파라미터)에서 이미 적용되어 넘어온다
   const filtered = useMemo(
     () =>
-      cards.filter((c) => {
-        if (statusFilter !== "all" && c.status !== statusFilter) return false;
-        if (
-          assigneeFilter !== "all" &&
-          !c.card_assignees.some((a) => a.user_id === assigneeFilter)
-        )
-          return false;
-        return true;
-      }),
-    [cards, statusFilter, assigneeFilter]
+      cards.filter(
+        (c) => statusFilter === "all" || c.status === statusFilter
+      ),
+    [cards, statusFilter]
   );
 
   // 월 그리드: 해당 월 1일이 속한 주의 일요일부터, 말일이 속한 주의 토요일까지
@@ -106,24 +94,10 @@ export default function CalendarView({
     });
   }
 
-  const assigneeIds = Object.keys(namesById);
-
   return (
     <div className="space-y-4">
       {/* 필터 + 월 이동 */}
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={assigneeFilter}
-          onChange={(e) => setAssigneeFilter(e.target.value)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
-        >
-          <option value="all">담당자 전체</option>
-          {assigneeIds.map((id) => (
-            <option key={id} value={id}>
-              {namesById[id]}
-            </option>
-          ))}
-        </select>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}

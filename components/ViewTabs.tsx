@@ -15,12 +15,16 @@ export default function ViewTabs({
   base,
   type,
   active,
+  query,
 }: {
   /** 예: /orgs/abc 또는 /board/xyz */
   base: string;
   type: "org" | "board";
   active: ViewKey;
+  /** 뷰를 옮겨도 유지할 쿼리스트링 (예: "assignee=<id>") */
+  query?: string;
 }) {
+  const qs = query ? `?${query}` : "";
   return (
     <nav className="flex flex-wrap gap-0.5 rounded-xl bg-slate-100 p-0.5">
       {VIEWS.map((view) => {
@@ -28,7 +32,7 @@ export default function ViewTabs({
         return (
           <Link
             key={view.key}
-            href={`${base}${view.suffix}`}
+            href={`${base}${view.suffix}${qs}`}
             className={`rounded-[0.625rem] px-3 py-1.5 text-sm font-medium transition ${
               isActive
                 ? "bg-white text-slate-900 shadow-sm"

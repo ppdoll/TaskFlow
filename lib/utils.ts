@@ -225,6 +225,31 @@ export function isOverdue(dueDate: string | null): boolean {
   return new Date(dueDate + "T00:00:00") < today;
 }
 
+/* ---------------- 담당자 필터 ---------------- */
+
+export const ASSIGNEE_ALL = "all";
+export const ASSIGNEE_NONE = "none";
+
+/** 담당자 목록이 현재 필터에 걸리는지 */
+export function matchesAssignee(
+  assigneeIds: string[],
+  filter: string
+): boolean {
+  if (!filter || filter === ASSIGNEE_ALL) return true;
+  if (filter === ASSIGNEE_NONE) return assigneeIds.length === 0;
+  return assigneeIds.includes(filter);
+}
+
+/** URL 파라미터 값을 안전한 필터 값으로 정규화 */
+export function normalizeAssigneeFilter(
+  value: string | undefined,
+  memberIds: string[]
+): string {
+  if (!value) return ASSIGNEE_ALL;
+  if (value === ASSIGNEE_NONE) return ASSIGNEE_NONE;
+  return memberIds.includes(value) ? value : ASSIGNEE_ALL;
+}
+
 /** 역할 한글 표기 */
 export const ROLE_LABELS: Record<string, string> = {
   owner: "조직장",

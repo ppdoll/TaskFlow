@@ -57,6 +57,7 @@ export default function BoardCanvas({
   members,
   currentUserId,
   initialCardId = null,
+  initialAssigneeFilter = FILTER_ALL,
 }: {
   board: Board;
   orgName: string;
@@ -66,6 +67,8 @@ export default function BoardCanvas({
   members: OrgMember[];
   currentUserId: string;
   initialCardId?: string | null;
+  /** 다른 뷰에서 넘어올 때 담당자 필터를 이어받는다 (?assignee=) */
+  initialAssigneeFilter?: string;
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -93,7 +96,9 @@ export default function BoardCanvas({
 
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
-  const [assigneeFilter, setAssigneeFilter] = useState<string>(FILTER_ALL);
+  const [assigneeFilter, setAssigneeFilter] = useState<string>(
+    initialAssigneeFilter
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })

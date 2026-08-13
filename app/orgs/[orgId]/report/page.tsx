@@ -3,19 +3,25 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
+import AssigneeFilter from "@/components/AssigneeFilter";
 import ReportView from "@/components/org/ReportView";
 import {
-  fetchMemberNames,
+  assigneeCounts,
+  fetchOrgMembers,
   fetchReportData,
   fetchScopedCards,
+  filterByAssignee,
 } from "@/lib/view-data";
+import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
 
 export default async function OrgReportPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ orgId: string }>;
+  searchParams: Promise<{ assignee?: string }>;
 }) {
-  const { orgId } = await params;
+  const [{ orgId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -32,11 +38,26 @@ export default async function OrgReportPage({
   ]);
   if (!org) notFound();
 
-  const [cards, namesById, report] = await Promise.all([
+  const [allCards, members] = await Promise.all([
     fetchScopedCards(supabase, { orgId }),
-    fetchMemberNames(supabase, orgId),
-    fetchReportData(supabase, { orgId }),
+    fetchOrgMembers(supabase, orgId),
   ]);
+
+  const filter = normalizeAssigneeFilter(
+    assignee,
+    members.map((m) => m.user_id)
+  );
+  const cards = filterByAssignee(allCards, filter);
+  const namesById = Object.fromEntries(
+    members.map((m) => [m.user_id, m.profiles?.name ?? "?"])
+  );
+
+  // 담당자 필터가 걸리면 통계·활동도 그 담당자의 카드로 제한한다
+  const report = await fetchReportData(
+    supabase,
+    { orgId },
+    filter === ASSIGNEE_ALL ? null : cards.map((c) => c.id)
+  );
 
   return (
     <>
@@ -57,7 +78,19 @@ export default async function OrgReportPage({
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold">보고서</h1>
-          <ViewTabs base={`/orgs/${orgId}`} type="org" active="report" />
+          <div className="flex flex-wrap items-center gap-2">
+            <AssigneeFilter
+              members={members}
+              value={filter}
+              counts={assigneeCounts(allCards)}
+            />
+            <ViewTabs
+              base={`/orgs/${orgId}`}
+              type="org"
+              active="report"
+              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+            />
+          </div>
         </div>
 
         <ReportView

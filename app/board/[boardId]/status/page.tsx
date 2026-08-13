@@ -3,19 +3,25 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
+import AssigneeFilter from "@/components/AssigneeFilter";
 import StatusView from "@/components/org/StatusView";
 import {
+  assigneeCounts,
   fetchBoardContext,
-  fetchMemberNames,
+  fetchOrgMembers,
   fetchScopedCards,
+  filterByAssignee,
 } from "@/lib/view-data";
+import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
 
 export default async function BoardStatusPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ boardId: string }>;
+  searchParams: Promise<{ assignee?: string }>;
 }) {
-  const { boardId } = await params;
+  const [{ boardId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -28,10 +34,19 @@ export default async function BoardStatusPage({
   ]);
   if (!board) notFound();
 
-  const [cards, namesById] = await Promise.all([
+  const [allCards, members] = await Promise.all([
     fetchScopedCards(supabase, { boardId }),
-    fetchMemberNames(supabase, board.org_id),
+    fetchOrgMembers(supabase, board.org_id),
   ]);
+
+  const filter = normalizeAssigneeFilter(
+    assignee,
+    members.map((m) => m.user_id)
+  );
+  const cards = filterByAssignee(allCards, filter);
+  const namesById = Object.fromEntries(
+    members.map((m) => [m.user_id, m.profiles?.name ?? "?"])
+  );
 
   return (
     <>
@@ -59,7 +74,19 @@ export default async function BoardStatusPage({
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold">{board.title} — 상태별</h1>
-          <ViewTabs base={`/board/${boardId}`} type="board" active="status" />
+          <div className="flex flex-wrap items-center gap-2">
+            <AssigneeFilter
+              members={members}
+              value={filter}
+              counts={assigneeCounts(allCards)}
+            />
+            <ViewTabs
+              base={`/board/${boardId}`}
+              type="board"
+              active="status"
+              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+            />
+          </div>
         </div>
 
         <StatusView cards={cards} namesById={namesById} showBoardName={false} />

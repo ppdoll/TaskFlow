@@ -3,20 +3,26 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
+import AssigneeFilter from "@/components/AssigneeFilter";
 import ReportView from "@/components/org/ReportView";
 import {
+  assigneeCounts,
   fetchBoardContext,
-  fetchMemberNames,
+  fetchOrgMembers,
   fetchReportData,
   fetchScopedCards,
+  filterByAssignee,
 } from "@/lib/view-data";
+import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
 
 export default async function BoardReportPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ boardId: string }>;
+  searchParams: Promise<{ assignee?: string }>;
 }) {
-  const { boardId } = await params;
+  const [{ boardId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -29,11 +35,25 @@ export default async function BoardReportPage({
   ]);
   if (!board) notFound();
 
-  const [cards, namesById, report] = await Promise.all([
+  const [allCards, members] = await Promise.all([
     fetchScopedCards(supabase, { boardId }),
-    fetchMemberNames(supabase, board.org_id),
-    fetchReportData(supabase, { boardId }),
+    fetchOrgMembers(supabase, board.org_id),
   ]);
+
+  const filter = normalizeAssigneeFilter(
+    assignee,
+    members.map((m) => m.user_id)
+  );
+  const cards = filterByAssignee(allCards, filter);
+  const namesById = Object.fromEntries(
+    members.map((m) => [m.user_id, m.profiles?.name ?? "?"])
+  );
+
+  const report = await fetchReportData(
+    supabase,
+    { boardId },
+    filter === ASSIGNEE_ALL ? null : cards.map((c) => c.id)
+  );
 
   return (
     <>
@@ -61,7 +81,19 @@ export default async function BoardReportPage({
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold">{board.title} — 보고서</h1>
-          <ViewTabs base={`/board/${boardId}`} type="board" active="report" />
+          <div className="flex flex-wrap items-center gap-2">
+            <AssigneeFilter
+              members={members}
+              value={filter}
+              counts={assigneeCounts(allCards)}
+            />
+            <ViewTabs
+              base={`/board/${boardId}`}
+              type="board"
+              active="report"
+              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+            />
+          </div>
         </div>
 
         <ReportView

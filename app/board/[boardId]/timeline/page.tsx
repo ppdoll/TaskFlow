@@ -3,15 +3,25 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
+import AssigneeFilter from "@/components/AssigneeFilter";
 import TimelineView from "@/components/org/TimelineView";
-import { fetchBoardContext, fetchScopedCards } from "@/lib/view-data";
+import {
+  assigneeCounts,
+  fetchBoardContext,
+  fetchOrgMembers,
+  fetchScopedCards,
+  filterByAssignee,
+} from "@/lib/view-data";
+import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
 
 export default async function BoardTimelinePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ boardId: string }>;
+  searchParams: Promise<{ assignee?: string }>;
 }) {
-  const { boardId } = await params;
+  const [{ boardId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,7 +34,16 @@ export default async function BoardTimelinePage({
   ]);
   if (!board) notFound();
 
-  const cards = await fetchScopedCards(supabase, { boardId });
+  const [allCards, members] = await Promise.all([
+    fetchScopedCards(supabase, { boardId }),
+    fetchOrgMembers(supabase, board.org_id),
+  ]);
+
+  const filter = normalizeAssigneeFilter(
+    assignee,
+    members.map((m) => m.user_id)
+  );
+  const cards = filterByAssignee(allCards, filter);
 
   return (
     <>
@@ -52,10 +71,22 @@ export default async function BoardTimelinePage({
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold">{board.title} — 타임라인</h1>
-          <ViewTabs base={`/board/${boardId}`} type="board" active="timeline" />
+          <div className="flex flex-wrap items-center gap-2">
+            <AssigneeFilter
+              members={members}
+              value={filter}
+              counts={assigneeCounts(allCards)}
+            />
+            <ViewTabs
+              base={`/board/${boardId}`}
+              type="board"
+              active="timeline"
+              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+            />
+          </div>
         </div>
 
-        <TimelineView initialCards={cards} />
+        <TimelineView key={filter} initialCards={cards} />
       </main>
     </>
   );

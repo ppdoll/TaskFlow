@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import BoardCanvas from "@/components/board/BoardCanvas";
+import { normalizeAssigneeFilter } from "@/lib/utils";
 import type { Card, Label, List, OrgMember } from "@/lib/types";
 
 interface RawCard {
@@ -26,9 +27,9 @@ export default async function BoardPage({
   searchParams,
 }: {
   params: Promise<{ boardId: string }>;
-  searchParams: Promise<{ card?: string }>;
+  searchParams: Promise<{ card?: string; assignee?: string }>;
 }) {
-  const [{ boardId }, { card: initialCardId }] = await Promise.all([
+  const [{ boardId }, { card: initialCardId, assignee }] = await Promise.all([
     params,
     searchParams,
   ]);
@@ -97,6 +98,10 @@ export default async function BoardPage({
       members={(members ?? []) as unknown as OrgMember[]}
       currentUserId={user.id}
       initialCardId={initialCardId ?? null}
+      initialAssigneeFilter={normalizeAssigneeFilter(
+        assignee,
+        (members ?? []).map((m) => m.user_id)
+      )}
     />
   );
 }

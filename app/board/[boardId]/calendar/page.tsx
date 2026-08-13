@@ -3,19 +3,25 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
+import AssigneeFilter from "@/components/AssigneeFilter";
 import CalendarView from "@/components/org/CalendarView";
 import {
+  assigneeCounts,
   fetchBoardContext,
-  fetchMemberNames,
+  fetchOrgMembers,
   fetchScopedCards,
+  filterByAssignee,
 } from "@/lib/view-data";
+import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
 
 export default async function BoardCalendarPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ boardId: string }>;
+  searchParams: Promise<{ assignee?: string }>;
 }) {
-  const { boardId } = await params;
+  const [{ boardId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -28,10 +34,16 @@ export default async function BoardCalendarPage({
   ]);
   if (!board) notFound();
 
-  const [cards, namesById] = await Promise.all([
+  const [allCards, members] = await Promise.all([
     fetchScopedCards(supabase, { boardId }),
-    fetchMemberNames(supabase, board.org_id),
+    fetchOrgMembers(supabase, board.org_id),
   ]);
+
+  const filter = normalizeAssigneeFilter(
+    assignee,
+    members.map((m) => m.user_id)
+  );
+  const cards = filterByAssignee(allCards, filter);
 
   return (
     <>
@@ -59,10 +71,22 @@ export default async function BoardCalendarPage({
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold">{board.title} — 캘린더</h1>
-          <ViewTabs base={`/board/${boardId}`} type="board" active="calendar" />
+          <div className="flex flex-wrap items-center gap-2">
+            <AssigneeFilter
+              members={members}
+              value={filter}
+              counts={assigneeCounts(allCards)}
+            />
+            <ViewTabs
+              base={`/board/${boardId}`}
+              type="board"
+              active="calendar"
+              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+            />
+          </div>
         </div>
 
-        <CalendarView cards={cards} namesById={namesById} />
+        <CalendarView key={filter} cards={cards} />
       </main>
     </>
   );
