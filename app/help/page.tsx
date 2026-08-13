@@ -169,11 +169,12 @@ export default function HelpPage() {
             </li>
             <li>
               <strong>담당자로 걸러 보기</strong> — 보드 상단의{" "}
-              <span className={kbd}>👤 전체</span> 를 눌러 특정 담당자의 업무만
-              볼 수 있습니다. 기본은 전체이고,{" "}
-              <span className={kbd}>담당자 없음</span> 으로 아직 배정되지 않은
-              업무만 모아 볼 수도 있습니다. 필터를 건 상태에서 카드를 추가하면
-              그 담당자가 자동으로 지정됩니다.
+              <span className={kbd}>👤 전체</span> 를 눌러 담당자를 고르면 그
+              사람의 업무만 보입니다. <strong>여러 명을 함께 선택</strong>하면
+              선택한 사람들의 업무가 모두 표시되고,{" "}
+              <span className={kbd}>담당자 없음</span> 을 골라 아직 배정되지
+              않은 업무만 볼 수도 있습니다. 한 사람만 고른 상태에서 카드를
+              추가하면 그 담당자가 자동으로 지정됩니다.
             </li>
             <li>
               <strong>실시간 동기화</strong> — 팀원이 카드를 옮기거나 수정하면{" "}
@@ -232,8 +233,9 @@ export default function HelpPage() {
             <li>
               <strong>담당자 필터</strong> — 네 가지 보기 모두 오른쪽 위{" "}
               <span className={kbd}>👤 전체</span> 로 담당자를 골라 볼 수
-              있습니다. <strong>보기를 바꿔도 필터가 유지</strong>되고, 주소가
-              함께 바뀌므로 &ldquo;○○님 일정&rdquo; 링크를 그대로 공유할 수도
+              있고 <strong>여러 명 동시 선택</strong>도 됩니다.{" "}
+              <strong>보기를 바꿔도 필터가 유지</strong>되고, 주소가 함께
+              바뀌므로 &ldquo;○○님 일정&rdquo; 링크를 그대로 공유할 수도
               있습니다.
             </li>
             <li>

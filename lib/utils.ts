@@ -227,27 +227,51 @@ export function isOverdue(dueDate: string | null): boolean {
 
 /* ---------------- 담당자 필터 ---------------- */
 
-export const ASSIGNEE_ALL = "all";
+/** 담당자가 없는 카드를 고르는 특수 값 */
 export const ASSIGNEE_NONE = "none";
 
-/** 담당자 목록이 현재 필터에 걸리는지 */
+/**
+ * 선택된 담당자 중 한 명이라도 맡고 있으면 통과(OR 조건).
+ * 아무도 선택하지 않았으면 전체를 뜻한다.
+ */
 export function matchesAssignee(
   assigneeIds: string[],
-  filter: string
+  selected: string[]
 ): boolean {
-  if (!filter || filter === ASSIGNEE_ALL) return true;
-  if (filter === ASSIGNEE_NONE) return assigneeIds.length === 0;
-  return assigneeIds.includes(filter);
+  if (selected.length === 0) return true;
+  if (selected.includes(ASSIGNEE_NONE) && assigneeIds.length === 0) return true;
+  return assigneeIds.some((id) => selected.includes(id));
 }
 
-/** URL 파라미터 값을 안전한 필터 값으로 정규화 */
-export function normalizeAssigneeFilter(
+/** URL 파라미터("a,b")를 안전한 담당자 목록으로 파싱 */
+export function parseAssigneeParam(
   value: string | undefined,
   memberIds: string[]
+): string[] {
+  if (!value) return [];
+  const allowed = new Set<string>([...memberIds, ASSIGNEE_NONE]);
+  const out: string[] = [];
+  for (const raw of value.split(",")) {
+    const v = raw.trim();
+    if (v && allowed.has(v) && !out.includes(v)) out.push(v);
+  }
+  return out;
+}
+
+/** 선택 목록을 URL 파라미터 문자열로 (없으면 undefined) */
+export function assigneeParam(selected: string[]): string | undefined {
+  return selected.length > 0 ? `assignee=${selected.join(",")}` : undefined;
+}
+
+/** 필터 버튼에 표시할 요약 라벨 */
+export function assigneeFilterLabel(
+  selected: string[],
+  nameOf: (id: string) => string
 ): string {
-  if (!value) return ASSIGNEE_ALL;
-  if (value === ASSIGNEE_NONE) return ASSIGNEE_NONE;
-  return memberIds.includes(value) ? value : ASSIGNEE_ALL;
+  if (selected.length === 0) return "전체";
+  const first =
+    selected[0] === ASSIGNEE_NONE ? "담당자 없음" : nameOf(selected[0]);
+  return selected.length === 1 ? first : `${first} 외 ${selected.length - 1}`;
 }
 
 /** 역할 한글 표기 */

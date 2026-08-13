@@ -13,7 +13,7 @@ import {
   fetchScopedCards,
   filterByAssignee,
 } from "@/lib/view-data";
-import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
+import { assigneeParam, parseAssigneeParam } from "@/lib/utils";
 
 export default async function BoardReportPage({
   params,
@@ -40,7 +40,7 @@ export default async function BoardReportPage({
     fetchOrgMembers(supabase, board.org_id),
   ]);
 
-  const filter = normalizeAssigneeFilter(
+  const filter = parseAssigneeParam(
     assignee,
     members.map((m) => m.user_id)
   );
@@ -52,7 +52,7 @@ export default async function BoardReportPage({
   const report = await fetchReportData(
     supabase,
     { boardId },
-    filter === ASSIGNEE_ALL ? null : cards.map((c) => c.id)
+    filter.length === 0 ? null : cards.map((c) => c.id)
   );
 
   return (
@@ -84,14 +84,14 @@ export default async function BoardReportPage({
           <div className="flex flex-wrap items-center gap-2">
             <AssigneeFilter
               members={members}
-              value={filter}
+              selected={filter}
               counts={assigneeCounts(allCards)}
             />
             <ViewTabs
               base={`/board/${boardId}`}
               type="board"
               active="report"
-              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+              query={assigneeParam(filter)}
             />
           </div>
         </div>

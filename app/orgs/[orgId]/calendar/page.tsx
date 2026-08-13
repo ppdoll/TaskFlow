@@ -11,7 +11,7 @@ import {
   fetchScopedCards,
   filterByAssignee,
 } from "@/lib/view-data";
-import { ASSIGNEE_ALL, normalizeAssigneeFilter } from "@/lib/utils";
+import { assigneeParam, parseAssigneeParam } from "@/lib/utils";
 
 export default async function OrgCalendarPage({
   params,
@@ -42,7 +42,7 @@ export default async function OrgCalendarPage({
     fetchOrgMembers(supabase, orgId),
   ]);
 
-  const filter = normalizeAssigneeFilter(
+  const filter = parseAssigneeParam(
     assignee,
     members.map((m) => m.user_id)
   );
@@ -70,19 +70,19 @@ export default async function OrgCalendarPage({
           <div className="flex flex-wrap items-center gap-2">
             <AssigneeFilter
               members={members}
-              value={filter}
+              selected={filter}
               counts={assigneeCounts(allCards)}
             />
             <ViewTabs
               base={`/orgs/${orgId}`}
               type="org"
               active="calendar"
-              query={filter === ASSIGNEE_ALL ? undefined : `assignee=${filter}`}
+              query={assigneeParam(filter)}
             />
           </div>
         </div>
 
-        <CalendarView key={filter} cards={cards} />
+        <CalendarView key={filter.join(",")} cards={cards} />
       </main>
     </>
   );

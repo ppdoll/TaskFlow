@@ -2,15 +2,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { OrgMember, ScopedCard } from "@/lib/types";
 import { matchesAssignee } from "@/lib/utils";
 
-/** 담당자 필터 적용 */
+/** 담당자 필터 적용 (선택된 사람 중 한 명이라도 맡았으면 통과) */
 export function filterByAssignee(
   cards: ScopedCard[],
-  filter: string
+  selected: string[]
 ): ScopedCard[] {
+  if (selected.length === 0) return cards;
   return cards.filter((c) =>
     matchesAssignee(
       c.card_assignees.map((a) => a.user_id),
-      filter
+      selected
     )
   );
 }

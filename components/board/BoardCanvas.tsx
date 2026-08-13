@@ -30,11 +30,8 @@ import ListColumn from "./ListColumn";
 import CardItem from "./CardItem";
 import CardModal from "./CardModal";
 import BoardSettingsModal from "./BoardSettingsModal";
-import BoardFilter, {
-  FILTER_ALL,
-  FILTER_NONE,
-  matchesAssigneeFilter,
-} from "./BoardFilter";
+import BoardFilter, { matchesAssigneeFilter } from "./BoardFilter";
+import { ASSIGNEE_NONE } from "@/lib/utils";
 import NotificationBell from "@/components/NotificationBell";
 import type { Board, Card, Label, List, OrgMember, Profile } from "@/lib/types";
 
@@ -57,7 +54,7 @@ export default function BoardCanvas({
   members,
   currentUserId,
   initialCardId = null,
-  initialAssigneeFilter = FILTER_ALL,
+  initialAssigneeFilter = [],
 }: {
   board: Board;
   orgName: string;
@@ -68,7 +65,7 @@ export default function BoardCanvas({
   currentUserId: string;
   initialCardId?: string | null;
   /** 다른 뷰에서 넘어올 때 담당자 필터를 이어받는다 (?assignee=) */
-  initialAssigneeFilter?: string;
+  initialAssigneeFilter?: string[];
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -96,9 +93,8 @@ export default function BoardCanvas({
 
   const [addingList, setAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
-  const [assigneeFilter, setAssigneeFilter] = useState<string>(
-    initialAssigneeFilter
-  );
+  const [assigneeFilter, setAssigneeFilter] =
+    useState<string[]>(initialAssigneeFilter);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -456,10 +452,11 @@ export default function BoardCanvas({
       const row = data as CardRow;
       // 특정 담당자로 걸러 보는 중이면, 만든 카드가 바로 사라지지 않도록
       // 그 담당자를 자동으로 지정한다
+      // 사람 한 명만 걸러 보는 중일 때만 자동 지정한다
+      // (여러 명을 골랐으면 누구에게 줄지 알 수 없으므로 지정하지 않음)
+      const people = assigneeFilter.filter((v) => v !== ASSIGNEE_NONE);
       const autoAssignee =
-        assigneeFilter !== FILTER_ALL && assigneeFilter !== FILTER_NONE
-          ? assigneeFilter
-          : null;
+        assigneeFilter.length === 1 && people.length === 1 ? people[0] : null;
 
       setCards((prev) =>
         prev.some((c) => c.id === row.id)
@@ -674,7 +671,7 @@ export default function BoardCanvas({
         )}
         <BoardFilter
           members={members}
-          value={assigneeFilter}
+          selected={assigneeFilter}
           onChange={setAssigneeFilter}
           counts={filterCounts}
         />

@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import BoardCanvas from "@/components/board/BoardCanvas";
-import { normalizeAssigneeFilter } from "@/lib/utils";
+import { parseAssigneeParam } from "@/lib/utils";
 import type { Card, Label, List, OrgMember } from "@/lib/types";
 
 interface RawCard {
@@ -98,7 +98,7 @@ export default async function BoardPage({
       members={(members ?? []) as unknown as OrgMember[]}
       currentUserId={user.id}
       initialCardId={initialCardId ?? null}
-      initialAssigneeFilter={normalizeAssigneeFilter(
+      initialAssigneeFilter={parseAssigneeParam(
         assignee,
         (members ?? []).map((m) => m.user_id)
       )}
