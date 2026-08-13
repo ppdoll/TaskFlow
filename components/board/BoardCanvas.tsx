@@ -634,7 +634,9 @@ export default function BoardCanvas({
       style={{ backgroundColor: theme.surface }}
     >
       {/* 보드 헤더 */}
-      <header className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-black/5 bg-white/70 px-4 py-2.5 backdrop-blur-xl">
+      {/* relative z-30: backdrop-blur 가 스택 컨텍스트를 만들기 때문에 z-index 를 주지 않으면
+          뒤에 오는 리스트(역시 transform/blur 로 컨텍스트 생성)가 드롭다운 위로 올라온다 */}
+      <header className="relative z-30 flex shrink-0 flex-wrap items-center gap-2.5 border-b border-black/5 bg-white/70 px-4 py-2.5 backdrop-blur-xl">
         <Link
           href={`/orgs/${board.org_id}`}
           className="rounded-lg px-2 py-1.5 text-sm font-medium text-sky-600 transition hover:bg-slate-100"
