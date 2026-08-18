@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   applicationName: "TaskFlow",
   manifest: "/manifest.webmanifest",
   icons: {
+    // favicon.ico 는 app/favicon.ico 파일 규칙으로 자동 링크되므로 여기 넣지 않는다
+    // (중복 <link> 방지). 고해상도용 PNG 만 추가한다.
+    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: "/icons/apple-touch-icon.png",
   },
   appleWebApp: {
@@ -30,6 +33,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
+    url: "/",
     siteName: "TaskFlow",
     title: "TaskFlow · 업무보드",
     description: DESCRIPTION,
