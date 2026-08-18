@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { OrgMember, ScopedCard } from "@/lib/types";
+import type { AttachmentListItem, OrgMember, ScopedCard } from "@/lib/types";
 import { matchesAssignee } from "@/lib/utils";
 
 /** 담당자 필터 적용 (선택된 사람 중 한 명이라도 맡았으면 통과) */
@@ -216,4 +216,23 @@ export async function fetchReportData(
       updated7: updatedRes.count ?? 0,
     },
   };
+}
+
+/** 조직 또는 보드 범위의 첨부 목록 (보드·카드·올린이 포함, 최신순) */
+export async function fetchAttachments(
+  supabase: SupabaseClient,
+  scope: ViewScope
+): Promise<AttachmentListItem[]> {
+  let query = supabase
+    .from("attachments")
+    .select(
+      "*, cards(title), boards!inner(title, color, org_id), profiles(name)"
+    );
+  if (scope.boardId) {
+    query = query.eq("board_id", scope.boardId);
+  } else if (scope.orgId) {
+    query = query.eq("boards.org_id", scope.orgId);
+  }
+  const { data } = await query.order("created_at", { ascending: false });
+  return (data ?? []) as unknown as AttachmentListItem[];
 }

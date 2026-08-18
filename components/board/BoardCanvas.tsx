@@ -682,6 +682,7 @@ export default function BoardCanvas({
             { href: `/board/${board.id}/timeline`, label: "타임라인" },
             { href: `/board/${board.id}/calendar`, label: "캘린더" },
             { href: `/board/${board.id}/report`, label: "보고서" },
+            { href: `/board/${board.id}/files`, label: "첨부" },
           ].map((view) => (
             <Link
               key={view.href}

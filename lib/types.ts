@@ -144,3 +144,20 @@ export interface Activity {
   created_at: string;
   profiles: { name: string } | null;
 }
+
+/** 첨부 모아보기 페이지에서 쓰는 행 (보드·카드·올린이 정보 포함) */
+export interface AttachmentListItem {
+  id: string;
+  card_id: string | null;
+  board_id: string;
+  type: "file" | "link";
+  name: string;
+  url: string;
+  size: number | null;
+  mime_type: string | null;
+  created_by: string | null;
+  created_at: string;
+  cards: { title: string } | null;
+  boards: { title: string; color: string } | null;
+  profiles: { name: string } | null;
+}

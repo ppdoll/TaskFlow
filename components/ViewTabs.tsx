@@ -1,6 +1,12 @@
 import Link from "next/link";
 
-export type ViewKey = "main" | "status" | "timeline" | "calendar" | "report";
+export type ViewKey =
+  | "main"
+  | "status"
+  | "timeline"
+  | "calendar"
+  | "report"
+  | "files";
 
 const VIEWS: { key: ViewKey; suffix: string; orgLabel: string; boardLabel: string }[] = [
   { key: "main", suffix: "", orgLabel: "📁 보드 목록", boardLabel: "📋 칸반 보드" },
@@ -8,6 +14,7 @@ const VIEWS: { key: ViewKey; suffix: string; orgLabel: string; boardLabel: strin
   { key: "timeline", suffix: "/timeline", orgLabel: "📅 타임라인", boardLabel: "📅 타임라인" },
   { key: "calendar", suffix: "/calendar", orgLabel: "🗓️ 캘린더", boardLabel: "🗓️ 캘린더" },
   { key: "report", suffix: "/report", orgLabel: "📈 보고서", boardLabel: "📈 보고서" },
+  { key: "files", suffix: "/files", orgLabel: "📎 첨부", boardLabel: "📎 첨부" },
 ];
 
 /** 조직/보드 하위 뷰 전환 탭 */
