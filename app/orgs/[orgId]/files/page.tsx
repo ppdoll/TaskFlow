@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
 import FileList from "@/components/org/FileList";
@@ -13,26 +14,22 @@ export default async function OrgFilesPage({
 }) {
   const { orgId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: org }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
+  const [{ data: org }, items] = await Promise.all([
     supabase
       .from("organizations")
       .select("id, name")
       .eq("id", orgId)
       .maybeSingle(),
+    fetchAttachments(supabase, { orgId }),
   ]);
   if (!org) notFound();
 
-  const items = await fetchAttachments(supabase, { orgId });
-
   return (
     <>
-      <AppHeader userId={user.id} userName={profile?.name ?? ""} />
+      <AppHeader userId={user.id} userName={user.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <div className="mb-2 text-sm text-slate-400">
           <Link href="/orgs" className="hover:text-sky-600 hover:underline">

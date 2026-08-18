@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
 import FileList from "@/components/org/FileList";
-import { fetchAttachments, fetchBoardContext } from "@/lib/view-data";
+import { fetchAttachments, fetchBoardWithMembers } from "@/lib/view-data";
 
 export default async function BoardFilesPage({
   params,
@@ -13,22 +14,19 @@ export default async function BoardFilesPage({
 }) {
   const { boardId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const [{ data: profile }, board] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    fetchBoardContext(supabase, boardId),
+  const [boardData, items] = await Promise.all([
+    fetchBoardWithMembers(supabase, boardId),
+    fetchAttachments(supabase, { boardId }),
   ]);
-  if (!board) notFound();
-
-  const items = await fetchAttachments(supabase, { boardId });
+  if (!boardData) notFound();
+  const { board } = boardData;
 
   return (
     <>
-      <AppHeader userId={user.id} userName={profile?.name ?? ""} />
+      <AppHeader userId={user.id} userName={user.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <div className="mb-2 text-sm text-slate-400">
           <Link href="/orgs" className="hover:text-sky-600 hover:underline">

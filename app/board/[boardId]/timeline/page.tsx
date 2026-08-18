@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
 import AssigneeFilter from "@/components/AssigneeFilter";
 import TimelineView from "@/components/org/TimelineView";
 import {
   assigneeCounts,
-  fetchBoardContext,
-  fetchOrgMembers,
+  fetchBoardWithMembers,
   fetchScopedCards,
   filterByAssignee,
 } from "@/lib/view-data";
@@ -23,21 +23,15 @@ export default async function BoardTimelinePage({
 }) {
   const [{ boardId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const [{ data: profile }, board] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    fetchBoardContext(supabase, boardId),
-  ]);
-  if (!board) notFound();
-
-  const [allCards, members] = await Promise.all([
+  const [boardData, allCards] = await Promise.all([
+    fetchBoardWithMembers(supabase, boardId),
     fetchScopedCards(supabase, { boardId }),
-    fetchOrgMembers(supabase, board.org_id),
   ]);
+  if (!boardData) notFound();
+  const { board, members } = boardData;
 
   const filter = parseAssigneeParam(
     assignee,
@@ -47,7 +41,7 @@ export default async function BoardTimelinePage({
 
   return (
     <>
-      <AppHeader userId={user.id} userName={profile?.name ?? ""} />
+      <AppHeader userId={user.id} userName={user.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <div className="mb-2 text-sm text-slate-400">
           <Link href="/orgs" className="hover:text-sky-600 hover:underline">

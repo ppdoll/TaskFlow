@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import AppHeader from "@/components/AppHeader";
 import CreateOrgForm from "@/components/org/CreateOrgForm";
 import { ROLE_LABELS } from "@/lib/utils";
@@ -17,25 +18,20 @@ interface MembershipRow {
 
 export default async function OrgsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: memberships }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase
-      .from("organization_members")
-      .select("role, organizations(id, name, allowed_domains)")
-      .eq("user_id", user.id)
-      .order("joined_at", { ascending: true }),
-  ]);
+  const { data: memberships } = await supabase
+    .from("organization_members")
+    .select("role, organizations(id, name, allowed_domains)")
+    .eq("user_id", user.id)
+    .order("joined_at", { ascending: true });
 
   const rows = (memberships ?? []) as unknown as MembershipRow[];
 
   return (
     <>
-      <AppHeader userId={user.id} userName={profile?.name ?? ""} />
+      <AppHeader userId={user.id} userName={user.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-2xl font-bold">내 조직</h1>

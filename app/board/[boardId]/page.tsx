@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import BoardCanvas from "@/components/board/BoardCanvas";
 import { parseAssigneeParam } from "@/lib/utils";
 import type { Card, Label, List, OrgMember } from "@/lib/types";
@@ -34,21 +35,20 @@ export default async function BoardPage({
     searchParams,
   ]);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const { data: board } = await supabase
-    .from("boards")
-    .select("*, organizations(id, name)")
-    .eq("id", boardId)
-    .maybeSingle();
-
-  if (!board) notFound();
-
-  const [{ data: lists }, { data: rawCards }, { data: labels }, { data: members }] =
+  // 멤버는 board.org_id 가 있어야 조회할 수 있어 예전엔 왕복이 2번이었다.
+  // 조직에 중첩해서 함께 받아오면 나머지와 같이 한 번에 끝난다.
+  const [{ data: board }, { data: lists }, { data: rawCards }, { data: labels }] =
     await Promise.all([
+      supabase
+        .from("boards")
+        .select(
+          "*, organizations(id, name, organization_members(*, profiles(id, email, name)))"
+        )
+        .eq("id", boardId)
+        .maybeSingle(),
       supabase
         .from("lists")
         .select("*")
@@ -66,12 +66,13 @@ export default async function BoardPage({
         .select("*")
         .eq("board_id", boardId)
         .order("name", { ascending: true }),
-      supabase
-        .from("organization_members")
-        .select("*, profiles(id, email, name)")
-        .eq("org_id", board.org_id)
-        .order("joined_at", { ascending: true }),
     ]);
+
+  if (!board) notFound();
+
+  const members = [
+    ...((board.organizations?.organization_members ?? []) as OrgMember[]),
+  ].sort((a, b) => a.joined_at.localeCompare(b.joined_at));
 
   const cards: Card[] = ((rawCards ?? []) as unknown as RawCard[]).map(
     ({ card_assignees, card_labels, attachments, ...card }) => ({

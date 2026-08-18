@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
 import CreateBoardForm from "@/components/org/CreateBoardForm";
@@ -14,19 +15,12 @@ export default async function OrgPage({
 }) {
   const { orgId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: org }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
+  // 서로 의존하지 않으므로 한 번에 병렬로 (왕복 1회)
+  const [{ data: org }, { data: boards }, { data: members }] = await Promise.all([
     supabase.from("organizations").select("*").eq("id", orgId).maybeSingle(),
-  ]);
-
-  if (!org) notFound();
-
-  const [{ data: boards }, { data: members }] = await Promise.all([
     supabase
       .from("boards")
       .select("*")
@@ -39,6 +33,8 @@ export default async function OrgPage({
       .order("joined_at", { ascending: true }),
   ]);
 
+  if (!org) notFound();
+
   const memberRows = (members ?? []) as unknown as OrgMember[];
   const boardRows = (boards ?? []) as Board[];
   const myRole = memberRows.find((m) => m.user_id === user.id)?.role;
@@ -46,7 +42,7 @@ export default async function OrgPage({
 
   return (
     <>
-      <AppHeader userId={user.id} userName={profile?.name ?? ""} />
+      <AppHeader userId={user.id} userName={user.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <div className="mb-2 text-sm text-slate-400">
           <Link href="/orgs" className="hover:text-sky-600 hover:underline">

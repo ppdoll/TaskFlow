@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/auth";
 import AppHeader from "@/components/AppHeader";
 import ViewTabs from "@/components/ViewTabs";
 import AssigneeFilter from "@/components/AssigneeFilter";
 import ReportView from "@/components/org/ReportView";
 import {
   assigneeCounts,
-  fetchBoardContext,
-  fetchOrgMembers,
+  fetchBoardWithMembers,
   fetchReportData,
   fetchScopedCards,
   filterByAssignee,
@@ -24,21 +24,17 @@ export default async function BoardReportPage({
 }) {
   const [{ boardId }, { assignee }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const [{ data: profile }, board] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    fetchBoardContext(supabase, boardId),
-  ]);
-  if (!board) notFound();
-
-  const [allCards, members] = await Promise.all([
+  // 담당자 필터가 없으면 보고서 집계도 카드에 의존하지 않으므로 함께 병렬로
+  const [boardData, allCards, unfilteredReport] = await Promise.all([
+    fetchBoardWithMembers(supabase, boardId),
     fetchScopedCards(supabase, { boardId }),
-    fetchOrgMembers(supabase, board.org_id),
+    assignee ? null : fetchReportData(supabase, { boardId }),
   ]);
+  if (!boardData) notFound();
+  const { board, members } = boardData;
 
   const filter = parseAssigneeParam(
     assignee,
@@ -49,15 +45,13 @@ export default async function BoardReportPage({
     members.map((m) => [m.user_id, m.profiles?.name ?? "?"])
   );
 
-  const report = await fetchReportData(
-    supabase,
-    { boardId },
-    filter.length === 0 ? null : cards.map((c) => c.id)
-  );
+  const report =
+    unfilteredReport ??
+    (await fetchReportData(supabase, { boardId }, cards.map((c) => c.id)));
 
   return (
     <>
-      <AppHeader userId={user.id} userName={profile?.name ?? ""} />
+      <AppHeader userId={user.id} userName={user.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
         <div className="mb-2 text-sm text-slate-400">
           <Link href="/orgs" className="hover:text-sky-600 hover:underline">

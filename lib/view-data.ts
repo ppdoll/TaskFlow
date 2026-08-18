@@ -175,7 +175,9 @@ export async function fetchReportData(
     return out as Q;
   };
 
-  const [feedRes, doneRes, createdRes, updatedRes] = await Promise.all([
+  // 예전엔 count:exact 쿼리 3개를 따로 던졌는데, 정확 카운트는 전체 스캔이라
+  // 느리다. 최근 7일 활동은 양이 적으므로 한 번에 받아 JS 에서 집계한다.
+  const [feedRes, recentRes] = await Promise.all([
     applyScope(
       supabase
         .from("activities")
@@ -188,32 +190,24 @@ export async function fetchReportData(
     applyScope(
       supabase
         .from("activities")
-        .select("id, boards!inner(org_id)", { count: "exact", head: true })
-        .eq("type", "status_changed")
-        .eq("data->>to", "done")
-        .gte("created_at", since)
-    ),
-    applyScope(
-      supabase
-        .from("activities")
-        .select("id, boards!inner(org_id)", { count: "exact", head: true })
-        .eq("type", "card_created")
-        .gte("created_at", since)
-    ),
-    applyScope(
-      supabase
-        .from("activities")
-        .select("id, boards!inner(org_id)", { count: "exact", head: true })
+        .select("type, data, boards!inner(org_id)")
         .gte("created_at", since)
     ),
   ]);
 
+  const recent = (recentRes.data ?? []) as unknown as {
+    type: string;
+    data: Record<string, string | null> | null;
+  }[];
+
   return {
     activities: (feedRes.data ?? []) as unknown as ReportActivity[],
     counts: {
-      done7: doneRes.count ?? 0,
-      created7: createdRes.count ?? 0,
-      updated7: updatedRes.count ?? 0,
+      done7: recent.filter(
+        (a) => a.type === "status_changed" && a.data?.to === "done"
+      ).length,
+      created7: recent.filter((a) => a.type === "card_created").length,
+      updated7: recent.length,
     },
   };
 }
@@ -235,4 +229,52 @@ export async function fetchAttachments(
   }
   const { data } = await query.order("created_at", { ascending: false });
   return (data ?? []) as unknown as AttachmentListItem[];
+}
+
+export interface BoardWithMembers {
+  board: BoardContext;
+  members: OrgMember[];
+}
+
+/**
+ * 보드 정보와 조직 멤버를 한 번에 가져온다.
+ * 멤버 조회에 board.org_id 가 필요해 원래는 왕복이 2번이었는데,
+ * 조직에 중첩해 받으면 1번으로 끝난다.
+ */
+export async function fetchBoardWithMembers(
+  supabase: SupabaseClient,
+  boardId: string
+): Promise<BoardWithMembers | null> {
+  const { data } = await supabase
+    .from("boards")
+    .select(
+      "id, title, color, org_id, organizations(name, organization_members(*, profiles(id, email, name)))"
+    )
+    .eq("id", boardId)
+    .maybeSingle();
+  if (!data) return null;
+
+  const row = data as unknown as {
+    id: string;
+    title: string;
+    color: string;
+    org_id: string;
+    organizations: {
+      name: string;
+      organization_members: OrgMember[];
+    } | null;
+  };
+
+  return {
+    board: {
+      id: row.id,
+      title: row.title,
+      color: row.color,
+      org_id: row.org_id,
+      orgName: row.organizations?.name ?? "",
+    },
+    members: [...(row.organizations?.organization_members ?? [])].sort((a, b) =>
+      a.joined_at.localeCompare(b.joined_at)
+    ),
+  };
 }
